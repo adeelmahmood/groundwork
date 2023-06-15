@@ -21,10 +21,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
             ></meta>
             <body className={inter.className}>
-                <TopGradient />
-                <Navbar />
-                <Providers>{children}</Providers>
-                <BottomGradient />
+                <Providers>
+                    <TopGradient />
+                    <Navbar />
+                    {children}
+                    <BottomGradient />
+                </Providers>
             </body>
         </html>
     );

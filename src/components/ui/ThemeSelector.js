@@ -48,7 +48,10 @@ export default function ThemeSelector({}) {
                             <Menu.Item>
                                 {({ active }) => (
                                     <button
-                                        onClick={() => setTheme("dark")}
+                                        onClick={() => {
+                                            console.log("changing theme to dark");
+                                            setTheme("dark");
+                                        }}
                                         className={`flex items-center px-6 py-2 dark:text-gray-800 ${
                                             active ? "bg-yellow-300" : ""
                                         }`}
