@@ -22,6 +22,7 @@ export default function Login({}) {
         if (redirectedFrom) {
             url = `${url}login-redirect?redirectedFrom=${encodeURI(redirectedFrom)}`;
         }
+        console.log("redirectURL", redirectURL);
         return url;
     };
 
