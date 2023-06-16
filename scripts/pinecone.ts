@@ -36,7 +36,7 @@ async function main() {
             vector: vector,
             topK: 3,
             includeMetadata: true,
-            namespace: "6e25ff6a-632e-4cb1-a099-a34af8ca6f1a",
+            namespace: "bac454f9-ebfc-4b7c-8a2e-487b0395e3b6",
         },
     });
 

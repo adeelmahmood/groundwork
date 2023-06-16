@@ -23,7 +23,7 @@ async function initPineconeClient() {
 
 async function crawl(urls: string[], excludes: string[]) {
     // Instantiate the crawler
-    const crawler = new Crawler(urls, excludes, 1000, 200);
+    const crawler = new Crawler(urls, excludes, 10, 200);
     // Start the crawler
     const pages = (await crawler.start()) as Page[];
 
@@ -159,13 +159,19 @@ export const crawler = inngest.createFunction(
         console.log(business);
 
         console.log("starting crawl");
+        console.time("crawl");
         const docs = await crawl([business.business_url], []);
+        console.timeEnd("crawl");
 
         console.log("starting embed");
+        console.time("embed");
         await generateEmbeddings(docs, business.id);
+        console.timeEnd("embed");
 
         console.log("starting updatedb");
+        console.time("db");
         await updateDb(accessToken, business);
+        console.timeEnd("db");
 
         return { event, body: "Done!" };
     }

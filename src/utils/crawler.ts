@@ -42,6 +42,7 @@ class Crawler {
         $("nav").remove();
         $("svg").remove();
         $("img").remove();
+        $("iframe").remove();
         $("style").remove();
         $("link[rel=stylesheet]").remove();
         const title = $("title").text().trim();
