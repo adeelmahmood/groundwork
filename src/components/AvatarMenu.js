@@ -14,7 +14,8 @@ export default function ({ user, setUser, ...rest }) {
         e.preventDefault();
         await supabase.auth.signOut();
         setUser({});
-        router.push("/");
+        router.refresh();
+        // router.push("/");
     };
 
     return (
@@ -24,9 +25,9 @@ export default function ({ user, setUser, ...rest }) {
                     <>
                         <span className="rounded-md shadow-sm">
                             <Menu.Button className="block h-8 w-8 overflow-hidden rounded-full border-2 border-indigo-400 hover:shadow-md focus:outline-none">
-                                {user?.user?.user_metadata?.avatar_url ? (
+                                {user?.user_metadata?.avatar_url ? (
                                     <img
-                                        src={user?.user?.user_metadata?.avatar_url}
+                                        src={user?.user_metadata?.avatar_url}
                                         className="h-full w-full object-cover"
                                     />
                                 ) : (
@@ -54,8 +55,7 @@ export default function ({ user, setUser, ...rest }) {
                                             Signed in as
                                         </p>
                                         <p className="truncate text-sm font-medium leading-5 text-gray-800">
-                                            {user?.user?.user_metadata?.full_name ||
-                                                user?.user?.email}
+                                            {user?.user_metadata?.full_name || user?.email}
                                         </p>
                                     </div>
 

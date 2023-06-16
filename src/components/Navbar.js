@@ -15,8 +15,11 @@ const Navbar = () => {
     const [user, setUser] = useState({});
 
     async function loadUser() {
-        const { data: _user } = await supabase.auth.getUser();
+        const {
+            data: { user: _user },
+        } = await supabase.auth.getUser();
         setUser(_user);
+        console.log(_user);
     }
 
     useEffect(() => {
@@ -54,21 +57,25 @@ const Navbar = () => {
                 <nav className={`${isMenuOpen ? "block" : "hidden lg:block"}`}>
                     <div className="px-2 pb-4 pt-2 lg:flex lg:p-0">
                         <a
-                            href="/register"
+                            href="/contractor/register"
                             className="block rounded px-2 py-1 font-semibold text-indigo-600 hover:bg-indigo-500 hover:text-white dark:text-gray-300 dark:hover:bg-slate-900"
                         >
                             Register Your Business
                         </a>
-                        {/* <span className="mx-2 hidden w-0.5 bg-gray-600/25 dark:bg-gray-400/25 sm:block"></span>
-                        <a
-                            href="/borrower/dashboard"
-                            className="block rounded px-2 py-1 font-semibold text-indigo-600 hover:bg-indigo-500 hover:text-white dark:text-gray-300 dark:hover:bg-slate-900"
-                        >
-                            Borrow
-                        </a> */}
+                        {user && user?.email && (
+                            <>
+                                <span className="mx-2 hidden w-0.5 bg-gray-600/25 dark:bg-gray-400/25 sm:block"></span>
+                                <a
+                                    href="/contractor/dashboard"
+                                    className="block rounded px-2 py-1 font-semibold text-indigo-600 hover:bg-indigo-500 hover:text-white dark:text-gray-300 dark:hover:bg-slate-900"
+                                >
+                                    Your Dashboard
+                                </a>
+                            </>
+                        )}
 
                         <div className="mb-3 border-t border-indigo-400 opacity-50 dark:border-gray-200 lg:hidden" />
-                        {!user?.user && (
+                        {!user && (
                             <div className="lg:hidden">
                                 <a
                                     href="/login"
@@ -78,13 +85,13 @@ const Navbar = () => {
                                 </a>
                             </div>
                         )}
-                        {user?.user && (
+                        {user && (
                             <div className="lg:hidden">
                                 <div className="flex items-center justify-between px-2 py-1">
                                     <div className="flex items-center">
-                                        {user?.user?.user_metadata?.avatar_url ? (
+                                        {user.user_metadata?.avatar_url ? (
                                             <img
-                                                src={user?.user?.user_metadata?.avatar_url}
+                                                src={user?.user_metadata?.avatar_url}
                                                 className="h-10 w-10 rounded-full border-2 border-indigo-400 object-cover"
                                             />
                                         ) : (
@@ -95,8 +102,7 @@ const Navbar = () => {
                                                 Signed in as
                                             </p>
                                             <p className="truncate text-sm font-medium leading-5 text-gray-800 dark:text-gray-300">
-                                                {user?.user?.user_metadata?.full_name ||
-                                                    user?.user?.email}
+                                                {user.user_metadata?.full_name || user?.email}
                                             </p>
                                         </div>
                                     </div>
@@ -119,7 +125,7 @@ const Navbar = () => {
                 </nav>
                 <div className="hidden items-center space-x-4 lg:flex">
                     <ThemeSelector />
-                    {user?.user ? (
+                    {user ? (
                         <AvatarMenu user={user} setUser={setUser} />
                     ) : (
                         <a href="/login" className="btn-primary">

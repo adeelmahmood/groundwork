@@ -1,7 +1,8 @@
 "use client";
 
-import GetStarted from "@/components/contractor/GetStarted";
-import BusinessInformation from "@/components/contractor/BusinessInformation";
+import GetStarted from "./GetStarted";
+import Information from "./Information";
+import RegisterComp from "./Register";
 import { useEffect, useState } from "react";
 import { CheckIcon } from "@heroicons/react/24/solid";
 
@@ -16,11 +17,22 @@ export default function Register() {
         },
         {
             href: "BusinessInformation",
-            title: "Business Information",
+            title: "Information",
             completed: false,
-            component: BusinessInformation,
+            component: Information,
+        },
+        {
+            href: "Register",
+            title: "Register",
+            completed: false,
+            component: RegisterComp,
         },
     ]);
+
+    const [business, setBusiness] = useState({
+        business_name: "",
+        business_url: "",
+    });
 
     const prevStage = () => {
         const current = stages.find((s) => s.href == stage);
@@ -40,9 +52,9 @@ export default function Register() {
         let href = e.target.href;
         href = href.indexOf("/") != -1 ? href.substring(href.lastIndexOf("/") + 1) : href;
         const targetStage = stages.find((s) => s.href == href);
-        if (targetStage?.completed) {
-            setStage(targetStage.href);
-        }
+        // if (targetStage?.completed) {
+        setStage(targetStage!.href);
+        // }
     };
 
     return (
@@ -85,7 +97,14 @@ export default function Register() {
                                 }
                                 const Comp = s.component;
                                 if (Comp && s.href == stage) {
-                                    return <Comp key={index} handle={stageCompleted} />;
+                                    return (
+                                        <Comp
+                                            key={index}
+                                            business={business}
+                                            setBusiness={setBusiness}
+                                            handle={stageCompleted}
+                                        />
+                                    );
                                 }
                             })}
                         </div>

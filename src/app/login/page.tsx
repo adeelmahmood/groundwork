@@ -13,16 +13,15 @@ export default function Login({}) {
         let url =
             process?.env?.NEXT_PUBLIC_OAUTH_REDIRECT_URL ?? // Manually set in vercel (mainly for staging)
             process?.env?.NEXT_PUBLIC_SITE_URL ?? // This points to prod url
-            "http://localhost:3000/"; // local
+            "http://localhost:3000"; // local
         // Make sure to include `https://` when not localhost.
         url = url.includes("http") ? url : `https://${url}`;
         // Make sure to including trailing `/`.
-        url = url.charAt(url.length - 1) === "/" ? url : `${url}/`;
+        // url = url.charAt(url.length - 1) === "/" ? url : `${url}/`;
         // if redirect query is provided, add that too
         if (redirectedFrom) {
-            url = `${url}login-redirect?redirectedFrom=${encodeURI(redirectedFrom)}`;
+            url = `${url}${encodeURI(redirectedFrom)}`;
         }
-        console.log("redirectURL", url);
         return url;
     };
 

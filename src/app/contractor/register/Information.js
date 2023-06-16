@@ -1,23 +1,21 @@
 import { ArrowLongRightIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 
-export default function GetStarted({ handle, ...rest }) {
+export default function GetStarted({ business, setBusiness, handle, ...rest }) {
     const [isCompleted, setIsCompleted] = useState(true);
 
-    const [name, setName] = useState("");
-    const [url, setUrl] = useState("");
+    const [name, setName] = useState(business.business_name);
+    const [url, setUrl] = useState(business.business_url);
 
     useEffect(() => {
         setIsCompleted(name && url);
     }, [name, url]);
 
     const handleNext = async () => {
-        setData({
-            ...data,
-            [fieldName]: value,
-            [genFieldName]: genValue,
-            [manualPickFieldName]: usingManual,
-            [genPickFieldName]: usingGen,
+        setBusiness({
+            ...business,
+            business_name: name,
+            business_url: url,
         });
 
         handle?.();
