@@ -11,7 +11,12 @@ export async function generateEmbeddingFor(query: string) {
 
 export async function formulateQuestion(question: string, chatHistory: string[]) {
     const prompt =
-        PromptTemplate.fromTemplate(`Given the following user prompt and conversation log, formulate a question that would be the most relevant to provide the user with an answer from a knowledge base. Always prioritize the user prompt over the conversation log. Ignore any conversation log that is not directly related to the user prompt. If you are unable to formulate a question, respond with the same USER PROMPT you got.
+        PromptTemplate.fromTemplate(`Given the following user prompt and conversation log, formulate a complete question.
+
+Use the following guidelines:
+- Always prioritize the user prompt over the conversation log. 
+- Ignore any conversation log that is not directly related to the user prompt. 
+- If you are unable to formulate a question, respond with the same USER PROMPT you got.
 
 USER PROMPT: {question}
 
@@ -44,7 +49,7 @@ export async function getMatches(
         },
     });
 
-    const hsMatches = result.matches?.filter((res) => res.score! > 0.8);
+    const hsMatches = result.matches?.filter((res) => res.score! > 0.78);
     const mdhs = hsMatches?.map((m) => {
         const md = m.metadata as any;
         return [md.url, m.score];

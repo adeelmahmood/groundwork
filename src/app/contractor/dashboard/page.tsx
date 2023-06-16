@@ -65,10 +65,14 @@ export default async function Dashboard() {
                                         )}
                                     </td>
                                     <td className="py-4 px-6 text-center">
-                                        <button className="btn-clear text-sm">Edit</button>
+                                        <button className="btn-clear text-sm" disabled={true}>
+                                            Edit
+                                        </button>
                                     </td>
                                     <td className="py-4 px-6 text-center">
-                                        <button className="btn-clear text-sm">Delete</button>
+                                        <button className="btn-clear text-sm" disabled={true}>
+                                            Delete
+                                        </button>
                                     </td>
                                 </tr>
                             );

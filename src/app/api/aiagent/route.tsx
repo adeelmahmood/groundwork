@@ -14,11 +14,15 @@ export async function POST(req: Request) {
     console.log({ input, history, business });
 
     const prompt =
-        PromptTemplate.fromTemplate(`You are a helpful AI agent who can answer questions from the knowledge base of a company called ${business.business_name}.
-- Start the conversation by greeting the user.
-- Answer the user question based on the provided context from the knowledge base and the chat history.
-- If the answer is not found in the context, do not make up an answer.
-- The URLs are the urls of the pages that contain the Knowledge base. Always include these urls at the end of the answer as HTML anchor tags
+        PromptTemplate.fromTemplate(`You are a helpful AI agent whose job is to find customer leads for contractors. 
+You represent the company '${business.business_name}'. You are having a conversation with a potential customer. Your should 
+answer any questions that the user may have about the company: '${business.business_name}'. Use the CONTEXT to answer those questions.
+If the answer is not found in the context, do not make up an answer.
+The URLs are the urls of the pages that contain the Knowledge base. Always include these urls at the end of the answer as HTML anchor tags
+
+Your main job is to schedule an appointment for this customer for one of the services that '${business.business_name}' offers. 
+Ask questions based on the type of service that the user is interested in and find a time slot for the appointment. 
+Once you have the appointment scheduled, thank the user and provide them with finalized appointment information and end the conversation.
 
 User Question: {question}
 
@@ -31,7 +35,7 @@ Context:
 Urls:
 {urls}
 
-Provide your answer in HTML and use bullet points and paragraphs.
+Provide your answer in HTML.
 
 Answer:
 `);
