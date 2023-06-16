@@ -1,7 +1,7 @@
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { TABLE_REG_BUSINESSES } from "../../../../utils/constants";
+import { TABLE_REG_BUSINESSES } from "../../../utils/constants";
 import { inngest } from "@/inngest/client";
 
 export async function POST(request: Request) {

@@ -1,14 +1,14 @@
-import { Crawler, Page } from "../../utils/crawler";
+import { Crawler, Page } from "../utils/crawler";
 import { inngest } from "./client";
 import { Document } from "langchain/document";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { PineconeClient, Vector } from "@pinecone-database/pinecone";
-import { sliceIntoChunks, truncateStringByBytes } from "../../utils/utils";
+import { sliceIntoChunks, truncateStringByBytes } from "../utils/utils";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import Bottleneck from "bottleneck";
 import { uuid } from "uuidv4";
 import { createClient } from "@supabase/supabase-js";
-import { TABLE_REG_BUSINESSES } from "../../utils/constants";
+import { TABLE_REG_BUSINESSES } from "../utils/constants";
 
 let pinecone: PineconeClient | null = null;
 

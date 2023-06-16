@@ -1,14 +1,16 @@
+import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
+import Link from "next/link";
 
-export default async function () {
+export default async function Dashboard() {
     const supabase = createServerComponentClient({ cookies });
 
     const { data: registeredBusinesses } = await supabase.from("registered_businesses").select();
 
     return (
         <div className="container mx-auto p-6">
-            <h2 className="max-w-6xl text-5xl font-bold tracking-wider text-white">
+            <h2 className="max-w-6xl text-5xl font-bold tracking-wider text-white mt-8">
                 <span className="bg-gradient-to-r from-indigo-500 to-green-600 bg-clip-text text-transparent">
                     Contractor Dashboard
                 </span>
@@ -20,6 +22,9 @@ export default async function () {
                         <tr>
                             <th scope="col" className="py-3 px-6" colSpan={2}>
                                 Registered Business
+                            </th>
+                            <th scope="col" className="py-3 px-6 text-center">
+                                Interact With AI Agent
                             </th>
                             <th scope="col" className="py-3 px-6 text-center">
                                 Edit
@@ -47,6 +52,17 @@ export default async function () {
                                                 </a>
                                             </div>
                                         </div>
+                                    </td>
+                                    <td className="py-4 px-6 text-center">
+                                        {b.crawl_completed && (
+                                            <Link
+                                                className="btn-clear text-sm"
+                                                href={`/contractor/interact/${b.id}`}
+                                            >
+                                                <ChatBubbleLeftIcon className="inline h-6 fill-current mr-2 text-gray-600" />
+                                                <span>Interact with AI Agent</span>
+                                            </Link>
+                                        )}
                                     </td>
                                     <td className="py-4 px-6 text-center">
                                         <button className="btn-clear text-sm">Edit</button>
