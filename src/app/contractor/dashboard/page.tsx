@@ -147,6 +147,54 @@ export default function Dashboard() {
                         </tbody>
                     </table>
                 </div>
+
+                <div className="mt-10 grid grid-cols-1 gap-14 sm:hidden md:grid-cols-2 lg:grid-cols-3">
+                    {businesses?.map((b: any, i: number) => {
+                        return (
+                            <div
+                                key={i}
+                                className="relative w-full space-y-5 overflow-hidden rounded-xl bg-gray-50 shadow-lg dark:bg-gray-800"
+                            >
+                                <div>
+                                    <div className="flex flex-col px-4 pt-4">
+                                        <div className="text-xl dark:text-gray-300 uppercase tracking-wide">
+                                            {b.business_name}
+                                        </div>
+                                        <div className="dark:text-green-300 text-indigo-500">
+                                            <a href={b.business_url} target="_blank">
+                                                {b.business_url}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col pb-4">
+                                    <div className="text-center">
+                                        {b.crawl_completed && (
+                                            <Link
+                                                className="btn-clear text-sm"
+                                                href={`/contractor/interact/${b.id}`}
+                                            >
+                                                <ChatBubbleLeftIcon className="inline h-6 fill-current mr-2 text-gray-600" />
+                                                <span>Interact with AI Agent</span>
+                                            </Link>
+                                        )}
+                                        <div className="mt-4 flex items-center justify-center space-x-4">
+                                            <button className="btn-clear text-sm" disabled={true}>
+                                                Edit
+                                            </button>
+                                            <button
+                                                className="btn-clear text-sm"
+                                                onClick={() => deleteBusiness(b)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </>
     );
