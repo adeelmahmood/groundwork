@@ -1,44 +1,48 @@
 import { PineconeClient } from "@pinecone-database/pinecone";
-import { OpenAI, PromptTemplate } from "langchain";
+import { OpenAI } from "langchain/llms/openai";
 import { LLMChain } from "langchain/chains";
 import { CallbackManager } from "langchain/callbacks";
-import {
-    formulateQuestion,
-    generateEmbeddingFor,
-    getMatches,
-    summarizeMatches,
-} from "../../../utils/prompts";
+import { formulateQuestion, getMatches, summarizeMatches } from "../../../utils/prompts";
+import { PromptTemplate } from "langchain";
 
 export async function POST(req: Request) {
-    const { input, history, business } = await req.json();
-    console.log({ input, history, business });
+    const {
+        input,
+        history,
+        business,
+        prompt: pt,
+        temperature,
+        formulateQuestion: fq,
+    } = await req.json();
+    console.log({ input, history, business, pt, temperature, fq });
 
-    const prompt =
-        PromptTemplate.fromTemplate(`You are a helpful AI agent whose job is to find customer leads for contractors. 
-You represent the company '${business.business_name}'. You are having a conversation with a potential customer. Your should 
-answer any questions that the user may have about the company: '${business.business_name}'. Use the CONTEXT to answer those questions.
-If the answer is not found in the context, do not make up an answer.
-The URLs are the urls of the pages that contain the Knowledge base. Always include these urls at the end of the answer as HTML anchor tags
+    const prompt = PromptTemplate.fromTemplate(pt);
 
-Your main job is to schedule an appointment for this customer for one of the services that '${business.business_name}' offers. 
-Ask questions based on the type of service that the user is interested in and find a time slot for the appointment. 
-Once you have the appointment scheduled, thank the user and provide them with finalized appointment information and end the conversation.
+    //         PromptTemplate.fromTemplate(`You are a helpful AI agent whose job is to find customer leads for contractors.
+    // You represent the company {businessName}. You are having a conversation with a potential customer. Your should
+    // answer any questions that the user may have about the company: {businessName}. Use the CONTEXT to answer those questions.
+    // If the answer is not found in the context, do not make up an answer.
+    // The URLs are the urls of the pages that contain the Knowledge base. Always include these urls at the end of the answer as HTML anchor tags
 
-User Question: {question}
+    // Your main job is to schedule an appointment for this customer for one of the services that {businessName} offers.
+    // Ask questions based on the type of service that the user is interested in and find a time slot for the appointment.
+    // Once you have the appointment scheduled, thank the user and provide them with finalized appointment information and end the conversation.
 
-Chat History:
-{chatHistory}
+    // User Question: {question}
 
-Context:
-{context}
+    // Chat History:
+    // {chatHistory}
 
-Urls:
-{urls}
+    // Context:
+    // {context}
 
-Provide your answer in HTML.
+    // Urls:
+    // {urls}
 
-Answer:
-`);
+    // Provide your answer in HTML.
+
+    // Answer:
+    // `);
 
     try {
         // initialize pinecone client
@@ -50,23 +54,24 @@ Answer:
 
         // first formulate a better question from user prompt and chat history
         console.time("forumate question");
-        const question = await formulateQuestion(input, history);
-        console.log("formulated question: " + question);
+        const question = fq ? await formulateQuestion(input, history) : input;
+        if (fq) console.log("formulated question: " + question);
+        else console.log("question: " + question);
         console.timeEnd("forumate question");
 
-        // generate embedding for the formulated question
-        console.time("embedding for question");
-        const embedding = await generateEmbeddingFor(question);
-        console.log("generated embedding for formulated question: " + embedding[0] + "...");
-        console.timeEnd("embedding for question");
+        // // generate embedding for the formulated question
+        // console.time("embedding for question");
+        // const embedding = await generateEmbeddingFor(question);
+        // console.log("generated embedding for formulated question: " + embedding[0] + "...");
+        // console.timeEnd("embedding for question");
 
         // lets get matches for this question
         console.time("getting matches");
-        const matches = await getMatches(pinecone, embedding, 3, business.id);
+        const matches = await getMatches(pinecone, question, 3, business.id);
         console.log("got matches ==> ", matches?.length);
-        if (matches?.length == 0) {
-            return new Response("Unable to find any information on this");
-        }
+        // if (matches?.length == 0) {
+        //     return new Response("Unable to find any information on this");
+        // }
         console.timeEnd("getting matches");
         const urls =
             matches &&
@@ -95,7 +100,7 @@ Answer:
             const writer = stream.writable.getWriter();
 
             const llm = new OpenAI({
-                temperature: 0,
+                temperature: temperature,
                 // maxTokens: 256,
                 // topP: 1,
                 // frequencyPenalty: 0,
@@ -128,6 +133,7 @@ Answer:
                     chatHistory: history,
                     context: summarizedMatches,
                     urls: urls && urls.length ? urls : [],
+                    businessName: business.business_name,
                 })
                 .catch((e: Error) => console.error(e));
 
@@ -136,7 +142,7 @@ Answer:
             });
         } else {
             const llm = new OpenAI({
-                temperature: 0,
+                temperature: temperature,
                 // maxTokens: 256,
                 // topP: 1,
                 // frequencyPenalty: 0,
@@ -151,6 +157,8 @@ Answer:
                 question: question,
                 chatHistory: history,
                 context: summarizedMatches,
+                urls: urls && urls.length ? urls : [],
+                businessName: business.business_name,
             });
             return new Response(JSON.stringify(response), {
                 headers: { "Content-Type": "application/json" },

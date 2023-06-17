@@ -6,6 +6,7 @@ import { TABLE_REG_BUSINESSES } from "../../../../utils/constants";
 import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
 import { Answer } from "./Answer";
 import { EventStreamContentType, fetchEventSource } from "@microsoft/fetch-event-source";
+import ConfigDialog from "./ConfigDialog";
 
 interface BusinessType {
     business_name: string;
@@ -21,6 +22,9 @@ export default function Interact({ params }: { params: { bid: string } }) {
     const [chatHistory, setChatHistory] = useState<string[]>([]);
 
     const [business, setBusiness] = useState<any>(null);
+    const [prompt, setPrompt] = useState("");
+    const [temperature, setTemperature] = useState(0);
+    const [formulateQuestion, setFormulateQuestion] = useState(false);
 
     const supabase = createClientComponentClient();
 
@@ -36,6 +40,11 @@ export default function Interact({ params }: { params: { bid: string } }) {
         setAnswer(
             `Welcome to ${data?.business_name}. I am here to help your with any questions you have about our services and I can also help you make an appointment. How may I help you?`
         );
+
+        const { data: config } = await supabase.from("prompts_configuration").select().single();
+        setPrompt(config?.config.prompt);
+        setTemperature(config?.config.temperature);
+        setFormulateQuestion(true);
     }
 
     async function ask(question: string) {
@@ -52,6 +61,9 @@ export default function Interact({ params }: { params: { bid: string } }) {
                 input: question,
                 history: chatHistory,
                 business,
+                prompt,
+                temperature,
+                formulateQuestion,
             }),
             async onopen(response) {
                 if (
@@ -90,6 +102,15 @@ export default function Interact({ params }: { params: { bid: string } }) {
                 <span className="bg-gradient-to-r from-indigo-500 to-green-600 bg-clip-text text-transparent">
                     Interact with AI Agent
                 </span>
+                <ConfigDialog
+                    prompt={prompt}
+                    setPrompt={setPrompt}
+                    temperature={temperature}
+                    setTemperature={setTemperature}
+                    formulateQuestion={formulateQuestion}
+                    setFormulateQuestion={setFormulateQuestion}
+                    closeFnc={() => {}}
+                />
             </h2>
 
             <div className="flex flex-col mt-4">

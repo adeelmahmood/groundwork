@@ -3,6 +3,8 @@ import { PineconeClient, ScoredVector } from "@pinecone-database/pinecone";
 import { OpenAI, PromptTemplate } from "langchain";
 import { LLMChain } from "langchain/chains";
 import { chunkSubstr } from "./utils";
+import { PineconeStore } from "langchain/vectorstores/pinecone";
+import { Document } from "langchain/document";
 
 export async function generateEmbeddingFor(query: string) {
     const embedding = new OpenAIEmbeddings();
@@ -35,28 +37,37 @@ Answer:
 
 export async function getMatches(
     pinecone: PineconeClient,
-    embedding: number[],
+    query: string,
+    // embedding: number[],
     topK: number,
     ns: string = ""
 ) {
     const index = pinecone!.Index("groundwork-contractors");
-    const result = await index.query({
-        queryRequest: {
-            vector: embedding,
-            topK,
-            includeMetadata: true,
-            namespace: ns,
-        },
+
+    const vectorStore = await PineconeStore.fromExistingIndex(new OpenAIEmbeddings(), {
+        pineconeIndex: index,
+        namespace: ns,
     });
 
-    const hsMatches = result.matches?.filter((res) => res.score! > 0.78);
-    const mdhs = hsMatches?.map((m) => {
-        const md = m.metadata as any;
-        return [md.url, m.score];
-    });
-    console.log(mdhs!.join(" "));
+    const matches = await vectorStore.similaritySearch(query, topK);
 
-    return hsMatches;
+    // const result = await index.query({
+    //     queryRequest: {
+    //         vector: embedding,
+    //         topK,
+    //         includeMetadata: true,
+    //         namespace: ns,
+    //     },
+    // });
+
+    // const hsMatches = result.matches?.filter((res) => res.score! > 0.78);
+    // const mdhs = hsMatches?.map((m) => {
+    //     const md = m.metadata as any;
+    //     return [md.url, m.score];
+    // });
+    // console.log(mdhs!.join(" "));
+
+    return matches;
 }
 
 export async function summarize(document: string, query: string) {
@@ -104,11 +115,11 @@ export async function summarizeDocument(document: string, query: string): Promis
 export async function summarizeMatches(
     pinecone: PineconeClient,
     query: string,
-    matches: ScoredVector[] | undefined
+    matches: Document<Record<string, any>>[]
 ) {
     // const pineconeIndex = pinecone!.Index("earnest-blog");
     return Promise.all(
-        matches!.map(async (match: ScoredVector) => {
+        matches!.map(async (match: Record<string, any>) => {
             let md = match?.metadata as any;
 
             // check if we already have the summary

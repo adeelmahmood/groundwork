@@ -7,6 +7,7 @@ export default function DialogComponent({
     heading,
     explicitClose = false,
     closeLabel = "Cancel",
+    width = "max-w-md",
     children,
 }) {
     let [isOpen, setIsOpen] = useState(isModelOpen);
@@ -46,7 +47,9 @@ export default function DialogComponent({
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all dark:bg-gray-800">
+                                <Dialog.Panel
+                                    className={`relative w-full ${width} transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all dark:bg-gray-800`}
+                                >
                                     {heading && (
                                         <Dialog.Title
                                             as="h3"
