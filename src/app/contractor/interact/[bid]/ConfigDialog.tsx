@@ -56,7 +56,8 @@ export default function ConfigDialog({
                             onChange={(e) => setPrompt(e.target.value)}
                         />
                     </div>
-                    <div className="w-full flex flex-col-reverse gap-y-2 mt-2 lg:flex-row lg:gap-y-0 lg:items-center lg:justify-between">
+
+                    <div className="w-full flex flex-col-reverse gap-y-2 mt-2 lg:mt-0 lg:flex-row lg:gap-y-0 lg:items-center lg:justify-between">
                         <button className="btn-clear" onClick={() => closeModal()}>
                             Use this configuration
                         </button>
