@@ -56,30 +56,29 @@ export default function ConfigDialog({
                             onChange={(e) => setPrompt(e.target.value)}
                         />
                     </div>
-                    <div className="w-full flex items-center justify-between">
-                        <div className="">
-                            <button className="btn-clear" onClick={() => closeModal()}>
-                                Use this configuration
-                            </button>
-                        </div>
-                        <div className="flex items-center gap-2">
+                    <div className="w-full flex flex-col-reverse gap-y-2 mt-2 lg:flex-row lg:gap-y-0 lg:items-center lg:justify-between">
+                        <button className="btn-clear" onClick={() => closeModal()}>
+                            Use this configuration
+                        </button>
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:gap-x-2">
                             <label>Temp 0 (deterministic) to 1 (creative) </label>
                             <input
                                 type="number"
                                 min={0}
                                 max={1}
                                 step={0.1}
-                                className="mt-2 max-w-md rounded-lg border-gray-300 text-gray-800 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-200 dark:focus:border-teal-500 dark:focus:ring-teal-500 disabled:bg-gray-100"
+                                className="mt-2 w-14 rounded-lg border-gray-300 text-gray-800 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-200 dark:focus:border-teal-500 dark:focus:ring-teal-500 disabled:bg-gray-100"
                                 value={temperature}
                                 onChange={(e) => setTemperature(parseFloat(e.target.value))}
                             />
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:gap-x-2">
                             <label>Formulate Question (from history)</label>
                             <input
+                                className="mt-2"
                                 type="checkbox"
                                 checked={formulateQuestion}
-                                onClick={() => setFormulateQuestion(!formulateQuestion)}
+                                onChange={() => setFormulateQuestion(!formulateQuestion)}
                             />
                         </div>
                     </div>
