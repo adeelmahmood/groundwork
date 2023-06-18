@@ -7,6 +7,7 @@ import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
 import { Answer } from "./Answer";
 import { EventStreamContentType, fetchEventSource } from "@microsoft/fetch-event-source";
 import ConfigDialog from "./ConfigDialog";
+import { useRouter } from "next/navigation";
 
 interface BusinessType {
     business_name: string;
@@ -20,13 +21,15 @@ export default function Interact({ params }: { params: { bid: string } }) {
 
     const [chatInput, setChatInput] = useState("");
     const [chatHistory, setChatHistory] = useState<string[]>([]);
+    const [chatStarted, isChatStarted] = useState(false);
 
     const [business, setBusiness] = useState<any>(null);
     const [prompt, setPrompt] = useState("");
     const [temperature, setTemperature] = useState(0);
-    const [formulateQuestion, setFormulateQuestion] = useState(false);
 
     const supabase = createClientComponentClient();
+
+    const router = useRouter();
 
     async function loadBusiness() {
         const { data, error } = await supabase
@@ -37,33 +40,26 @@ export default function Interact({ params }: { params: { bid: string } }) {
 
         setBusiness(data);
 
-        setAnswer(
-            `Welcome to ${data?.business_name}. I am here to help your with any questions you have about our services and I can also help you make an appointment. How may I help you?`
-        );
-
         const { data: config } = await supabase.from("prompts_configuration").select().single();
         setPrompt(config?.config.prompt);
         setTemperature(config?.config.temperature);
-        setFormulateQuestion(true);
     }
 
-    async function ask(question: string) {
+    async function chat(starting: boolean = false) {
         setIsLoading(true);
 
-        // if (!chatInput) return;
-        if (question) setChatHistory((prev) => [...prev, "[User] " + question]);
+        if (!starting && chatInput) setChatHistory((prev) => [...prev, "[User] " + chatInput]);
 
         const response: string[] = [];
         const chat = await fetchEventSource("/api/aiagent", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                input: question,
-                history: chatHistory,
+                input: chatInput,
+                history: starting ? [] : chatHistory,
                 business,
                 prompt,
                 temperature,
-                formulateQuestion,
             }),
             async onopen(response) {
                 if (
@@ -84,6 +80,10 @@ export default function Interact({ params }: { params: { bid: string } }) {
                 if (response.length > 0) {
                     console.log(response.join(""));
                     setChatHistory((prev) => [...prev, "[Assistant] " + response.join("")]);
+                    // setCanSearchForScholarship(
+                    //     response.join("").trim().includes('<span class="hidden"') ||
+                    //         response.join("").trim().includes("<span class='hidden'")
+                    // );
                 }
             },
             onerror(err) {
@@ -91,6 +91,32 @@ export default function Interact({ params }: { params: { bid: string } }) {
             },
         });
     }
+
+    async function updatePrompt() {
+        const { error } = await supabase
+            .from("prompts_configuration")
+            .update({
+                config: {
+                    prompt,
+                    temperature,
+                },
+            })
+            .eq("id", 1);
+        if (error) {
+            console.log(error);
+        } else {
+            setChatHistory([]);
+            chat(true);
+        }
+    }
+
+    useEffect(() => {
+        // start chat
+        if (prompt && !chatStarted) {
+            isChatStarted(true);
+            chat(true);
+        }
+    }, [prompt]);
 
     useEffect(() => {
         loadBusiness();
@@ -107,9 +133,7 @@ export default function Interact({ params }: { params: { bid: string } }) {
                     setPrompt={setPrompt}
                     temperature={temperature}
                     setTemperature={setTemperature}
-                    formulateQuestion={formulateQuestion}
-                    setFormulateQuestion={setFormulateQuestion}
-                    closeFnc={() => {}}
+                    closeFnc={updatePrompt}
                 />
             </h2>
 
@@ -128,7 +152,7 @@ export default function Interact({ params }: { params: { bid: string } }) {
 
                 {chatHistory.length > 1 && (
                     <div className="relative w-full mt-2">
-                        <div className="w-full flex-1 items-center rounded-lg border px-4 py-4 shadow-md max-h-48 min-h-max overflow-y-auto">
+                        <div className="w-full flex-1 items-center rounded-lg border px-4 py-4 shadow-md min-h-max overflow-y-auto">
                             <div className="flex flex-col gap-6 text-gray-500">
                                 {chatHistory
                                     .slice(0, chatHistory.length - 1)
@@ -154,7 +178,7 @@ export default function Interact({ params }: { params: { bid: string } }) {
                         placeholder="Lets chat!"
                         onChange={(e: any) => setChatInput(e.currentTarget.value)}
                         onKeyUp={(e: any) => {
-                            if (e.keyCode == 13) ask(chatInput);
+                            if (e.keyCode == 13) chat();
                         }}
                     />
                 </div>

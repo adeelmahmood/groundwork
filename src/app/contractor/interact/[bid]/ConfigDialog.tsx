@@ -7,23 +7,18 @@ export default function ConfigDialog({
     setPrompt,
     temperature,
     setTemperature,
-    formulateQuestion,
-    setFormulateQuestion,
     closeFnc,
 }: {
     prompt: string;
     setPrompt: any;
     temperature: number;
     setTemperature: any;
-    formulateQuestion: boolean;
-    setFormulateQuestion: any;
     closeFnc: any;
 }) {
     let [modalOpen, setModalOpen] = useState<boolean>();
 
     function closeModal() {
         setModalOpen(false);
-        closeFnc?.();
     }
 
     return (
@@ -58,7 +53,13 @@ export default function ConfigDialog({
                     </div>
 
                     <div className="w-full flex flex-col-reverse gap-y-2 mt-2 lg:mt-0 lg:flex-row lg:gap-y-0 lg:items-center lg:justify-between">
-                        <button className="btn-clear" onClick={() => closeModal()}>
+                        <button
+                            className="btn-primary"
+                            onClick={() => {
+                                closeFnc?.();
+                                closeModal();
+                            }}
+                        >
                             Use this configuration
                         </button>
                         <div className="flex flex-col lg:flex-row lg:items-center lg:gap-x-2">
@@ -68,18 +69,9 @@ export default function ConfigDialog({
                                 min={0}
                                 max={1}
                                 step={0.1}
-                                className="mt-2 w-14 rounded-lg border-gray-300 text-gray-800 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-200 dark:focus:border-teal-500 dark:focus:ring-teal-500 disabled:bg-gray-100"
+                                className="mt-2 w-24 rounded-lg border-gray-300 text-gray-800 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-200 dark:focus:border-teal-500 dark:focus:ring-teal-500 disabled:bg-gray-100"
                                 value={temperature}
                                 onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                            />
-                        </div>
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:gap-x-2">
-                            <label>Formulate Question (from history)</label>
-                            <input
-                                className="mt-2"
-                                type="checkbox"
-                                checked={formulateQuestion}
-                                onChange={() => setFormulateQuestion(!formulateQuestion)}
                             />
                         </div>
                     </div>

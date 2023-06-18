@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pinecone": "tsx scripts/pinecone.ts"
+    "pinecone": "tsx scripts/pinecone.ts",
+    "genprompt": "tsx scripts/genprompt.ts"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.15",
