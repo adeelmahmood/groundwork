@@ -10,30 +10,17 @@ import {
     PromptTemplate,
     SystemMessagePromptTemplate,
 } from "langchain/prompts";
-import { cookies } from "next/headers";
-import { TABLE_RECEPTIONIST_PROMPTS, TABLE_REG_BUSINESSES } from "@/utils/constants";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 
 export async function POST(req: Request) {
-    const { input, history, business } = await req.json();
+    const { input, history, business, promptConfig } = await req.json();
 
     try {
-        const supabase = createRouteHandlerClient({ cookies });
-
         // initialize pinecone client
         // const pinecone: PineconeClient = new PineconeClient();
         // await pinecone.init({
         //     environment: process.env.PINECONE_ENVIRONMENT!,
         //     apiKey: process.env.PINECONE_API_KEY!,
         // });
-
-        // retrieve business prompt
-        const { data: promptConfig, error } = await supabase
-            .from(TABLE_RECEPTIONIST_PROMPTS)
-            .select()
-            .eq("business_id", business.id)
-            .single();
-        if (error) throw new Error("unable to retrieve business prompt " + error.message);
 
         // generate history
         const pastMessages: any[] = history.map((h: string) => {

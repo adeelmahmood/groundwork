@@ -2,17 +2,12 @@
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
-import { TABLE_REG_BUSINESSES } from "../../../../../utils/constants";
+import { TABLE_RECEPTIONIST_PROMPTS, TABLE_REG_BUSINESSES } from "../../../../../utils/constants";
 import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
 import { Answer } from "./Answer";
 import { EventStreamContentType, fetchEventSource } from "@microsoft/fetch-event-source";
 import { useRouter } from "next/navigation";
 import Sidebar from "../../sidebar";
-
-interface BusinessType {
-    business_name: string;
-    business_url: string;
-}
 
 export default function Interact({ params }: { params: { id: string } }) {
     const [answer, setAnswer] = useState("");
@@ -25,6 +20,7 @@ export default function Interact({ params }: { params: { id: string } }) {
 
     const [businesses, setBusinesses] = useState<any>(null);
     const [business, setBusiness] = useState<any>(null);
+    const [promptConfig, setPromptConfig] = useState<any>();
 
     const supabase = createClientComponentClient();
 
@@ -33,7 +29,16 @@ export default function Interact({ params }: { params: { id: string } }) {
     async function loadBusinesses(id: string) {
         const { data, error } = await supabase.from(TABLE_REG_BUSINESSES).select();
         setBusinesses(data);
-        setBusiness(data?.find((b) => b.id == id));
+        const bdata = data?.find((b) => b.id == id);
+        setBusiness(bdata);
+
+        // retrieve business prompt
+        const { data: config, error: promptError } = await supabase
+            .from(TABLE_RECEPTIONIST_PROMPTS)
+            .select()
+            .eq("business_id", bdata?.id)
+            .single();
+        setPromptConfig(config);
     }
 
     async function chat(starting: boolean = false) {
@@ -49,6 +54,7 @@ export default function Interact({ params }: { params: { id: string } }) {
                 input: chatInput,
                 history: starting ? [] : chatHistory,
                 business,
+                promptConfig,
             }),
             async onopen(response) {
                 if (
@@ -83,11 +89,11 @@ export default function Interact({ params }: { params: { id: string } }) {
 
     useEffect(() => {
         // start chat
-        if (business && !chatStarted) {
+        if (business && promptConfig && !chatStarted) {
             isChatStarted(true);
             chat(true);
         }
-    }, [chatStarted, business]);
+    }, [chatStarted, business, promptConfig]);
 
     useEffect(() => {
         loadBusinesses(params.id);
