@@ -8,12 +8,13 @@ import {
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     MessagesPlaceholder,
+    PromptTemplate,
     SystemMessagePromptTemplate,
 } from "langchain/prompts";
 
 export async function POST(req: Request) {
     const { input, history, business, prompt: pt, temperature } = await req.json();
-    console.log({ input, history, business, pt, temperature });
+    // console.log({ input, history, business, pt, temperature });
 
     try {
         // initialize pinecone client
@@ -41,9 +42,17 @@ export async function POST(req: Request) {
             memoryKey: "history",
         });
 
+        const promptData = {
+            ...business,
+            business_description: business.business_description.replace(/\n/g, " "),
+        };
+        const promptTemplate = PromptTemplate.fromTemplate(pt);
+        const promptParsed = await promptTemplate.format(promptData);
+        console.log(promptParsed);
+
         // generate prompt
         const prompt = ChatPromptTemplate.fromPromptMessages([
-            SystemMessagePromptTemplate.fromTemplate(pt),
+            SystemMessagePromptTemplate.fromTemplate(promptParsed),
             new MessagesPlaceholder("history"),
             HumanMessagePromptTemplate.fromTemplate("{input}"),
         ]);

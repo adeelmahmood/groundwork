@@ -2,7 +2,7 @@
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
-import { TABLE_REG_BUSINESSES } from "../../../../utils/constants";
+import { TABLE_REG_BUSINESSES } from "../../../../../utils/constants";
 import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
 import { Answer } from "./Answer";
 import { EventStreamContentType, fetchEventSource } from "@microsoft/fetch-event-source";
@@ -14,7 +14,7 @@ interface BusinessType {
     business_url: string;
 }
 
-export default function Interact({ params }: { params: { bid: string } }) {
+export default function Interact({ params }: { params: { id: string } }) {
     const [answer, setAnswer] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -35,7 +35,7 @@ export default function Interact({ params }: { params: { bid: string } }) {
         const { data, error } = await supabase
             .from(TABLE_REG_BUSINESSES)
             .select()
-            .eq("id", params.bid)
+            .eq("id", params.id)
             .single();
 
         setBusiness(data);
@@ -78,7 +78,7 @@ export default function Interact({ params }: { params: { bid: string } }) {
             },
             onclose() {
                 if (response.length > 0) {
-                    console.log(response.join(""));
+                    // console.log(response.join(""));
                     setChatHistory((prev) => [...prev, "[Assistant] " + response.join("")]);
                     // setCanSearchForScholarship(
                     //     response.join("").trim().includes('<span class="hidden"') ||

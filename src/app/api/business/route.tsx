@@ -2,8 +2,6 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { TABLE_REG_BUSINESSES } from "../../../utils/constants";
-import { inngest } from "@/inngest/client";
-import { useSearchParams } from "next/navigation";
 import { PineconeClient } from "@pinecone-database/pinecone";
 
 export async function POST(request: Request) {
@@ -16,12 +14,12 @@ export async function POST(request: Request) {
         data: { user },
     } = await supabase.auth.getUser();
 
-    const {
-        data: { session },
-    } = await supabase.auth.getSession();
+    // const {
+    //     data: { session },
+    // } = await supabase.auth.getSession();
 
     // save business
-    const { data } = await supabase
+    const { data, error } = await supabase
         .from(TABLE_REG_BUSINESSES)
         .upsert({
             ...business,
@@ -30,16 +28,20 @@ export async function POST(request: Request) {
         .select()
         .single();
 
-    // Send request to Inngest to crawl the business website
-    if (!data?.crawl_completed) {
-        await inngest.send({
-            name: "event.crawl",
-            data: {
-                business: data,
-                accessToken: session?.access_token,
-            },
-        });
+    if (error) {
+        console.log("error in saving business", error);
     }
+
+    // Send request to Inngest to crawl the business website
+    // if (!data?.crawl_completed) {
+    //     await inngest.send({
+    //         name: "event.crawl",
+    //         data: {
+    //             business: data,
+    //             accessToken: session?.access_token,
+    //         },
+    //     });
+    // }
 
     return NextResponse.json({ data });
 }

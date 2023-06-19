@@ -19,7 +19,6 @@ const Navbar = () => {
             data: { user: _user },
         } = await supabase.auth.getUser();
         setUser(_user);
-        console.log(_user);
     }
 
     useEffect(() => {

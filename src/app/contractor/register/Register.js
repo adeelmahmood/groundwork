@@ -6,6 +6,7 @@ export default function RegisterComp({ business, setBusiness, handle, ...rest })
     const router = useRouter();
 
     const handleNext = async () => {
+        console.log(JSON.stringify(business));
         await fetch("/api/business", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
