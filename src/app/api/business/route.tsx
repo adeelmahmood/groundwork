@@ -11,7 +11,6 @@ import { PineconeClient } from "@pinecone-database/pinecone";
 
 export async function POST(request: Request) {
     const { business } = await request.json();
-    console.log(business);
 
     const supabase = createRouteHandlerClient({ cookies });
 

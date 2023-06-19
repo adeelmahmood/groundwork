@@ -1,4 +1,3 @@
-import { PineconeClient } from "@pinecone-database/pinecone";
 import { ConversationChain } from "langchain/chains";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { CallbackManager } from "langchain/callbacks";
@@ -11,35 +10,22 @@ import {
     PromptTemplate,
     SystemMessagePromptTemplate,
 } from "langchain/prompts";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { TABLE_RECEPTIONIST_PROMPTS, TABLE_REG_BUSINESSES } from "@/utils/constants";
-import { createClient } from "@supabase/supabase-js";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 
 export async function POST(req: Request) {
     const { input, history, business } = await req.json();
 
     try {
-        // const supabase = createRouteHandlerClient({ cookies });
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            {
-                auth: {
-                    persistSession: false,
-                },
-            }
-        );
+        const supabase = createRouteHandlerClient({ cookies });
 
         // initialize pinecone client
-        const pinecone: PineconeClient = new PineconeClient();
-        await pinecone.init({
-            environment: process.env.PINECONE_ENVIRONMENT!,
-            apiKey: process.env.PINECONE_API_KEY!,
-        });
-
-        const { data: x, error: y } = await supabase.from(TABLE_REG_BUSINESSES).select();
-        if (y) throw new Error("error y " + y.message);
+        // const pinecone: PineconeClient = new PineconeClient();
+        // await pinecone.init({
+        //     environment: process.env.PINECONE_ENVIRONMENT!,
+        //     apiKey: process.env.PINECONE_API_KEY!,
+        // });
 
         // retrieve business prompt
         const { data: promptConfig, error } = await supabase
