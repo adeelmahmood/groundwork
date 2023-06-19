@@ -13,11 +13,10 @@ import {
 } from "langchain/prompts";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import { TABLE_RECEPTIONIST_PROMPTS } from "@/utils/constants";
+import { TABLE_RECEPTIONIST_PROMPTS, TABLE_REG_BUSINESSES } from "@/utils/constants";
 
 export async function POST(req: Request) {
     const { input, history, business } = await req.json();
-    console.log(business);
 
     try {
         const supabase = createRouteHandlerClient({ cookies });
@@ -28,6 +27,9 @@ export async function POST(req: Request) {
             environment: process.env.PINECONE_ENVIRONMENT!,
             apiKey: process.env.PINECONE_API_KEY!,
         });
+
+        const { data: x, error: y } = await supabase.from(TABLE_REG_BUSINESSES).select();
+        if (y) throw new Error("error y " + y.message);
 
         // retrieve business prompt
         const { data: promptConfig, error } = await supabase
