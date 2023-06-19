@@ -14,12 +14,22 @@ import {
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { TABLE_RECEPTIONIST_PROMPTS, TABLE_REG_BUSINESSES } from "@/utils/constants";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
     const { input, history, business } = await req.json();
 
     try {
-        const supabase = createRouteHandlerClient({ cookies });
+        // const supabase = createRouteHandlerClient({ cookies });
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                auth: {
+                    persistSession: false,
+                },
+            }
+        );
 
         // initialize pinecone client
         const pinecone: PineconeClient = new PineconeClient();
