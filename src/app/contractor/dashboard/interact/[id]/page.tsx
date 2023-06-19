@@ -8,6 +8,7 @@ import { Answer } from "./Answer";
 import { EventStreamContentType, fetchEventSource } from "@microsoft/fetch-event-source";
 import ConfigDialog from "./ConfigDialog";
 import { useRouter } from "next/navigation";
+import Sidebar from "../../sidebar";
 
 interface BusinessType {
     business_name: string;
@@ -23,7 +24,9 @@ export default function Interact({ params }: { params: { id: string } }) {
     const [chatHistory, setChatHistory] = useState<string[]>([]);
     const [chatStarted, isChatStarted] = useState(false);
 
+    const [businesses, setBusinesses] = useState<any>(null);
     const [business, setBusiness] = useState<any>(null);
+
     const [prompt, setPrompt] = useState("");
     const [temperature, setTemperature] = useState(0);
 
@@ -31,14 +34,10 @@ export default function Interact({ params }: { params: { id: string } }) {
 
     const router = useRouter();
 
-    async function loadBusiness() {
-        const { data, error } = await supabase
-            .from(TABLE_REG_BUSINESSES)
-            .select()
-            .eq("id", params.id)
-            .single();
-
-        setBusiness(data);
+    async function loadBusinesses(id: string) {
+        const { data, error } = await supabase.from(TABLE_REG_BUSINESSES).select();
+        setBusinesses(data);
+        setBusiness(data?.find((b) => b.id == id));
 
         const { data: config } = await supabase.from("prompts_configuration").select().single();
         setPrompt(config?.config.prompt);
@@ -119,68 +118,72 @@ export default function Interact({ params }: { params: { id: string } }) {
     }, [prompt]);
 
     useEffect(() => {
-        loadBusiness();
-    }, [supabase]);
+        loadBusinesses(params.id);
+    }, [supabase, params]);
 
     return (
-        <div className="container mx-auto p-6">
-            <h2 className="max-w-6xl text-5xl font-bold tracking-wider text-white mt-8">
-                <span className="bg-gradient-to-r from-indigo-500 to-green-600 bg-clip-text text-transparent">
-                    Interact with AI Agent
-                </span>
-                <ConfigDialog
-                    prompt={prompt}
-                    setPrompt={setPrompt}
-                    temperature={temperature}
-                    setTemperature={setTemperature}
-                    closeFnc={updatePrompt}
-                />
-            </h2>
+        <div className="flex">
+            <Sidebar businesses={businesses} business={business} />
 
-            <div className="flex flex-col mt-4">
-                {answer && (
-                    <div className="relative w-full">
-                        <div
-                            className={`w-full flex-1 items-center rounded-lg border px-4 py-4 shadow-md ${
-                                isLoading && "opacity-25"
-                            }`}
-                        >
-                            <Answer text={answer} />
-                        </div>
-                    </div>
-                )}
+            <div className="container mx-auto p-6">
+                <h2 className="max-w-6xl text-5xl font-bold tracking-wider text-white mt-8">
+                    <span className="bg-gradient-to-r from-indigo-500 to-green-600 bg-clip-text text-transparent">
+                        Interact with AI Agent
+                    </span>
+                    <ConfigDialog
+                        prompt={prompt}
+                        setPrompt={setPrompt}
+                        temperature={temperature}
+                        setTemperature={setTemperature}
+                        closeFnc={updatePrompt}
+                    />
+                </h2>
 
-                {chatHistory.length > 1 && (
-                    <div className="relative w-full mt-2">
-                        <div className="w-full flex-1 items-center rounded-lg border px-4 py-4 shadow-md min-h-max overflow-y-auto">
-                            <div className="flex flex-col gap-6 text-gray-500">
-                                {chatHistory
-                                    .slice(0, chatHistory.length - 1)
-                                    .reverse()
-                                    .map((ch, i) => (
-                                        <div
-                                            className="prose-em"
-                                            key={i}
-                                            dangerouslySetInnerHTML={{ __html: ch }}
-                                        />
-                                    ))}
+                <div className="flex flex-col mt-4">
+                    {answer && (
+                        <div className="relative w-full">
+                            <div
+                                className={`w-full flex-1 items-center rounded-lg border px-4 py-4 shadow-md ${
+                                    isLoading && "opacity-25"
+                                }`}
+                            >
+                                <Answer text={answer} />
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                <div className="flex items-center rounded-lg border px-4 py-2 shadow-md mt-2">
-                    <ChatBubbleLeftIcon className="inline h-6 fill-current text-teal-700" />
-                    <input
-                        type="text"
-                        value={chatInput}
-                        className="ml-2 w-full appearance-none border-0 p-2 text-lg text-gray-600 focus:outline-none focus:ring-0 md:p-4 md:text-2xl bg-transparent"
-                        placeholder="Lets chat!"
-                        onChange={(e: any) => setChatInput(e.currentTarget.value)}
-                        onKeyUp={(e: any) => {
-                            if (e.keyCode == 13) chat();
-                        }}
-                    />
+                    {chatHistory.length > 1 && (
+                        <div className="relative w-full mt-2">
+                            <div className="w-full flex-1 items-center rounded-lg border px-4 py-4 shadow-md min-h-max overflow-y-auto">
+                                <div className="flex flex-col gap-6 text-gray-500">
+                                    {chatHistory
+                                        .slice(0, chatHistory.length - 1)
+                                        .reverse()
+                                        .map((ch, i) => (
+                                            <div
+                                                className="prose-em"
+                                                key={i}
+                                                dangerouslySetInnerHTML={{ __html: ch }}
+                                            />
+                                        ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex items-center rounded-lg border px-4 py-2 shadow-md mt-2">
+                        <ChatBubbleLeftIcon className="inline h-6 fill-current text-teal-700" />
+                        <input
+                            type="text"
+                            value={chatInput}
+                            className="ml-2 w-full appearance-none border-0 p-2 text-lg text-gray-600 focus:outline-none focus:ring-0 md:p-4 md:text-2xl bg-transparent"
+                            placeholder="Lets chat!"
+                            onChange={(e: any) => setChatInput(e.currentTarget.value)}
+                            onKeyUp={(e: any) => {
+                                if (e.keyCode == 13) chat();
+                            }}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

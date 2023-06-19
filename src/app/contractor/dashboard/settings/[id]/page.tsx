@@ -6,8 +6,10 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Sidebar from "../../sidebar";
 
 export default function Settings({ params }: { params: { id: string } }) {
+    const [businesses, setBusinesses] = useState<any>(null);
     const [business, setBusiness] = useState<any>(null);
 
     const [deleteModal, setDeleteModal] = useState(false);
@@ -17,14 +19,10 @@ export default function Settings({ params }: { params: { id: string } }) {
 
     const router = useRouter();
 
-    async function loadBusiness() {
-        const { data, error } = await supabase
-            .from(TABLE_REG_BUSINESSES)
-            .select()
-            .eq("id", params.id)
-            .single();
-
-        setBusiness(data);
+    async function loadBusinesses(id: string) {
+        const { data, error } = await supabase.from(TABLE_REG_BUSINESSES).select();
+        setBusinesses(data);
+        setBusiness(data?.find((b) => b.id == id));
     }
 
     const handleDeleteBusiness = async () => {
@@ -41,8 +39,9 @@ export default function Settings({ params }: { params: { id: string } }) {
     };
 
     useEffect(() => {
-        loadBusiness();
+        loadBusinesses(params.id);
     }, [supabase]);
+
     return (
         <>
             <DialogComponent
@@ -66,31 +65,35 @@ export default function Settings({ params }: { params: { id: string } }) {
                 </button>
             </DialogComponent>
 
-            <div className="container mx-auto p-6">
-                <h2 className="max-w-6xl text-5xl font-bold tracking-wider text-white mt-8">
-                    <span className="bg-gradient-to-r from-indigo-500 to-green-600 bg-clip-text text-transparent">
-                        Settings
-                    </span>
-                </h2>
+            <div className="flex">
+                <Sidebar businesses={businesses} business={business} />
 
-                <div className="flex flex-col mt-8">
-                    <p>Edit the settings for this business</p>
-                    <Link
-                        className="btn-clear w-72 text-center mt-2"
-                        href={`/contractor/register?id=${business?.id}`}
-                    >
-                        Edit Business
-                    </Link>
-                </div>
+                <div className="container mx-auto p-6">
+                    <h2 className="max-w-6xl text-5xl font-bold tracking-wider text-white mt-8">
+                        <span className="bg-gradient-to-r from-indigo-500 to-green-600 bg-clip-text text-transparent">
+                            Settings
+                        </span>
+                    </h2>
 
-                <div className="flex flex-col mt-8">
-                    <p>Delete this business</p>
-                    <button
-                        className="btn-clear w-72 text-center mt-2"
-                        onClick={() => setDeleteModal(true)}
-                    >
-                        Delete Business
-                    </button>
+                    <div className="flex flex-col mt-8">
+                        <p>Edit the settings for this business</p>
+                        <Link
+                            className="btn-clear w-72 text-center mt-2"
+                            href={`/contractor/register?id=${business?.id}`}
+                        >
+                            Edit Business
+                        </Link>
+                    </div>
+
+                    <div className="flex flex-col mt-8">
+                        <p>Delete this business</p>
+                        <button
+                            className="btn-clear w-72 text-center mt-2"
+                            onClick={() => setDeleteModal(true)}
+                        >
+                            Delete Business
+                        </button>
+                    </div>
                 </div>
             </div>
         </>
