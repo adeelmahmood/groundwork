@@ -1,7 +1,9 @@
 import ListBoxComponent from "@/components/ui/ListBoxComponent";
-import { ArrowLeftCircleIcon } from "@heroicons/react/24/solid";
+import { Bars2Icon } from "@heroicons/react/24/solid";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface BusinessType {
     id: string;
@@ -18,42 +20,60 @@ export default function Sidebar({
 }) {
     const router = useRouter();
 
+    const [open, setOpen] = useState(false);
+
     return (
-        <aside className="h-screen w-72 border-r border-t border-b border-gray-300 shadow-md rounded-md dark:border-slate-400">
-            <div className="flex flex-col">
-                {businesses && businesses.length > 0 && (
-                    <div className="px-4 py-4 mt-4">
-                        <ListBoxComponent
-                            value={business}
-                            setValue={(b: any) => router.replace(`/contractor/dashboard/${b.id}`)}
-                            valueDisplay={(c: any) => c?.business_name}
-                            options={businesses}
-                        />
-                    </div>
-                )}
-                <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer py-4">
-                    <Link href={`/contractor/dashboard/${business?.id}`}>Home</Link>
+        <>
+            {!open && (
+                <div className="lg:hidden">
+                    <button onClick={() => setOpen(!open)}>
+                        <Bars2Icon className="h-8 fill-current text-indigo-700 focus:outline-none dark:text-gray-200" />
+                    </button>
                 </div>
-                {business && (
-                    <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
-                        <Link href={`/contractor/dashboard/interact/${business?.id}`}>
-                            Interact with AI Agent
-                        </Link>
-                    </div>
-                )}
-                {/* {business && (
+            )}
+            <aside className={`${!open ? "hidden lg:block" : "fixed block bg-gray-50"}`}>
+                <div className="h-screen w-72 border-r border-t border-b border-gray-300 shadow-md rounded-md dark:border-slate-400">
+                    {open && (
+                        <div>
+                            <button onClick={() => setOpen(!open)}>
+                                <Bars2Icon className="h-8 fill-current text-indigo-700 focus:outline-none dark:text-gray-200" />
+                            </button>
+                        </div>
+                    )}
+                    {business && businesses.length && (
+                        <div className="flex flex-col">
+                            <div className="px-4 py-4">
+                                <ListBoxComponent
+                                    value={business}
+                                    setValue={(b: any) =>
+                                        router.replace(`/contractor/dashboard/${b.id}`)
+                                    }
+                                    valueDisplay={(c: any) => c?.business_name}
+                                    options={businesses}
+                                />
+                            </div>
+                            <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer py-4">
+                                <Link href={`/contractor/dashboard/${business?.id}`}>Home</Link>
+                            </div>
+                            <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
+                                <Link href={`/contractor/dashboard/interact/${business?.id}`}>
+                                    Interact with AI Agent
+                                </Link>
+                            </div>
+                            {/* {business && (
                         <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
                             Analyze Conversations
                         </div>
                     )} */}
-                {business && (
-                    <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
-                        <Link href={`/contractor/dashboard/settings/${business?.id}`}>
-                            Settings
-                        </Link>
-                    </div>
-                )}
-            </div>
-        </aside>
+                            <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
+                                <Link href={`/contractor/dashboard/settings/${business?.id}`}>
+                                    Settings
+                                </Link>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </aside>
+        </>
     );
 }

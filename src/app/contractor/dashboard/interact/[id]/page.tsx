@@ -6,7 +6,6 @@ import { TABLE_REG_BUSINESSES } from "../../../../../utils/constants";
 import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
 import { Answer } from "./Answer";
 import { EventStreamContentType, fetchEventSource } from "@microsoft/fetch-event-source";
-import ConfigDialog from "./ConfigDialog";
 import { useRouter } from "next/navigation";
 import Sidebar from "../../sidebar";
 
@@ -27,9 +26,6 @@ export default function Interact({ params }: { params: { id: string } }) {
     const [businesses, setBusinesses] = useState<any>(null);
     const [business, setBusiness] = useState<any>(null);
 
-    const [prompt, setPrompt] = useState("");
-    const [temperature, setTemperature] = useState(0);
-
     const supabase = createClientComponentClient();
 
     const router = useRouter();
@@ -38,10 +34,6 @@ export default function Interact({ params }: { params: { id: string } }) {
         const { data, error } = await supabase.from(TABLE_REG_BUSINESSES).select();
         setBusinesses(data);
         setBusiness(data?.find((b) => b.id == id));
-
-        const { data: config } = await supabase.from("prompts_configuration").select().single();
-        setPrompt(config?.config.prompt);
-        setTemperature(config?.config.temperature);
     }
 
     async function chat(starting: boolean = false) {
@@ -57,8 +49,6 @@ export default function Interact({ params }: { params: { id: string } }) {
                 input: chatInput,
                 history: starting ? [] : chatHistory,
                 business,
-                prompt,
-                temperature,
             }),
             async onopen(response) {
                 if (
@@ -91,31 +81,13 @@ export default function Interact({ params }: { params: { id: string } }) {
         });
     }
 
-    async function updatePrompt() {
-        const { error } = await supabase
-            .from("prompts_configuration")
-            .update({
-                config: {
-                    prompt,
-                    temperature,
-                },
-            })
-            .eq("id", 1);
-        if (error) {
-            console.log(error);
-        } else {
-            setChatHistory([]);
-            chat(true);
-        }
-    }
-
     useEffect(() => {
         // start chat
-        if (prompt && !chatStarted) {
+        if (business && !chatStarted) {
             isChatStarted(true);
             chat(true);
         }
-    }, [prompt]);
+    }, [chatStarted, business]);
 
     useEffect(() => {
         loadBusinesses(params.id);
@@ -130,13 +102,6 @@ export default function Interact({ params }: { params: { id: string } }) {
                     <span className="bg-gradient-to-r from-indigo-500 to-green-600 bg-clip-text text-transparent">
                         Interact with AI Agent
                     </span>
-                    <ConfigDialog
-                        prompt={prompt}
-                        setPrompt={setPrompt}
-                        temperature={temperature}
-                        setTemperature={setTemperature}
-                        closeFnc={updatePrompt}
-                    />
                 </h2>
 
                 <div className="flex flex-col mt-4">

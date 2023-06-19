@@ -1,7 +1,12 @@
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { TABLE_REG_BUSINESSES } from "../../../utils/constants";
+import {
+    RECEPTIONIST_PROMPT,
+    RECEPTIONIST_PROMPT_TEMPERATURE,
+    TABLE_RECEPTIONIST_PROMPTS,
+    TABLE_REG_BUSINESSES,
+} from "../../../utils/constants";
 import { PineconeClient } from "@pinecone-database/pinecone";
 
 export async function POST(request: Request) {
@@ -18,11 +23,14 @@ export async function POST(request: Request) {
     //     data: { session },
     // } = await supabase.auth.getSession();
 
+    // remove relations
+    const { receptionist_prompts, ...bus } = business;
+
     // save business
     const { data, error } = await supabase
         .from(TABLE_REG_BUSINESSES)
         .upsert({
-            ...business,
+            ...bus,
             contractor_id: user?.id,
         })
         .select()
@@ -30,6 +38,25 @@ export async function POST(request: Request) {
 
     if (error) {
         console.log("error in saving business", error);
+    }
+
+    // check if we dont have a prompt for this business yet
+    const { data: promptData, error: promptError } = await supabase
+        .from(TABLE_RECEPTIONIST_PROMPTS)
+        .select()
+        .eq("business_id", data?.id)
+        .single();
+    if (!promptData) {
+        // save receptionist prompt
+        const { error: pError } = await supabase.from(TABLE_RECEPTIONIST_PROMPTS).insert({
+            prompt: RECEPTIONIST_PROMPT,
+            temperature: RECEPTIONIST_PROMPT_TEMPERATURE,
+            business_id: data?.id,
+        });
+
+        if (pError) {
+            console.log("error in saving prompt", pError);
+        }
     }
 
     // Send request to Inngest to crawl the business website
@@ -43,7 +70,7 @@ export async function POST(request: Request) {
     //     });
     // }
 
-    return NextResponse.json({ data });
+    return NextResponse.json(data);
 }
 
 let pinecone: PineconeClient | null = null;

@@ -7,14 +7,15 @@ export default function RegisterComp({ business, setBusiness, handle, ...rest })
 
     const handleNext = async () => {
         console.log(JSON.stringify(business));
-        await fetch("/api/business", {
+        const response = await fetch("/api/business", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ business }),
         });
+        const data = await response.json();
 
         // redirect to contractor dashboard
-        router.push("/contractor/dashboard");
+        router.push(`/contractor/dashboard/${data?.id}`);
     };
 
     return (

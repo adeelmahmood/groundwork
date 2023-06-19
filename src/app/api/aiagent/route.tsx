@@ -11,18 +11,31 @@ import {
     PromptTemplate,
     SystemMessagePromptTemplate,
 } from "langchain/prompts";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { TABLE_RECEPTIONIST_PROMPTS } from "@/utils/constants";
 
 export async function POST(req: Request) {
-    const { input, history, business, prompt: pt, temperature } = await req.json();
-    // console.log({ input, history, business, pt, temperature });
+    const { input, history, business } = await req.json();
+    console.log(business);
 
     try {
+        const supabase = createRouteHandlerClient({ cookies });
+
         // initialize pinecone client
         const pinecone: PineconeClient = new PineconeClient();
         await pinecone.init({
             environment: process.env.PINECONE_ENVIRONMENT!,
             apiKey: process.env.PINECONE_API_KEY!,
         });
+
+        // retrieve business prompt
+        const { data: promptConfig, error } = await supabase
+            .from(TABLE_RECEPTIONIST_PROMPTS)
+            .select()
+            .eq("business_id", business.id)
+            .single();
+        if (error) throw new Error("unable to retrieve business prompt " + error.message);
 
         // generate history
         const pastMessages: any[] = history.map((h: string) => {
@@ -46,7 +59,7 @@ export async function POST(req: Request) {
             ...business,
             business_description: business.business_description.replace(/\n/g, " "),
         };
-        const promptTemplate = PromptTemplate.fromTemplate(pt);
+        const promptTemplate = PromptTemplate.fromTemplate(promptConfig.prompt);
         const promptParsed = await promptTemplate.format(promptData);
         // console.log(promptParsed);
 
@@ -64,7 +77,7 @@ export async function POST(req: Request) {
             const writer = stream.writable.getWriter();
 
             const llm = new ChatOpenAI({
-                temperature: temperature,
+                temperature: promptConfig.temperature,
                 // maxTokens: 256,
                 // topP: 1,
                 // frequencyPenalty: 0,
@@ -102,7 +115,7 @@ export async function POST(req: Request) {
                 headers: { "Content-Type": "text/event-stream" },
             });
         } else {
-            const llm = new ChatOpenAI({ temperature: 0 });
+            const llm = new ChatOpenAI({ temperature: promptConfig.temperature });
             const chain = new ConversationChain({
                 memory: memory,
                 prompt: prompt,
