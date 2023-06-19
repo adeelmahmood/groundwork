@@ -32,7 +32,7 @@ export default function Dashboard({ params }: { params: { id: string } }) {
     return (
         <>
             <div className="flex">
-                <Sidebar businesses={businesses} business={business} setBusiness={setBusiness} />
+                <Sidebar businesses={businesses} business={business} />
 
                 <div className="container mx-auto p-6">
                     <h2 className="max-w-6xl text-5xl font-bold tracking-wider text-white mt-8">

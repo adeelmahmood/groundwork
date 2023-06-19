@@ -12,11 +12,9 @@ interface BusinessType {
 export default function Sidebar({
     businesses,
     business,
-    setBusiness = null,
 }: {
     businesses: BusinessType[];
     business: BusinessType;
-    setBusiness: any;
 }) {
     const router = useRouter();
 
@@ -28,7 +26,6 @@ export default function Sidebar({
                         <ListBoxComponent
                             value={business}
                             setValue={(b: any) => router.replace(`/contractor/dashboard/${b.id}`)}
-                            // setValue={setBusiness}
                             valueDisplay={(c: any) => c?.business_name}
                             options={businesses}
                         />
