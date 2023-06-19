@@ -45,11 +45,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                             </Link>
                         </div>
                     )}
-                    {business && (
+                    {/* {business && (
                         <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
                             Analyze Conversations
                         </div>
-                    )}
+                    )} */}
                     {business && (
                         <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
                             <Link href={`/contractor/dashboard/settings/${business?.id}`}>

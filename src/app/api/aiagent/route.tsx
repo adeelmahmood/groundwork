@@ -48,7 +48,7 @@ export async function POST(req: Request) {
         };
         const promptTemplate = PromptTemplate.fromTemplate(pt);
         const promptParsed = await promptTemplate.format(promptData);
-        console.log(promptParsed);
+        // console.log(promptParsed);
 
         // generate prompt
         const prompt = ChatPromptTemplate.fromPromptMessages([
