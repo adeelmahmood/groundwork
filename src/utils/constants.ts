@@ -118,7 +118,21 @@ Start the conversation by greeting the user.
 export const RECEPTIONIST_PROMPT_TEMPERATURE = 0.5;
 
 export const SUMMARIZER_PROMPT_TYPE = "summarizer";
-export const SUMMARIZER_PROMPT = `Summarize the follwing conversation between an AI receptionist and a human customer.
+export const SUMMARIZER_PROMPT = `Review this conversation between an AI agent and a customer. Create a concise summary of the conversation, identifying key details that the user provided that can be helpful for the contractor to determine the nature of the job and if they should accept the job. The key details should include information such as:
+Review this conversation between an AI agent and a customer. Create a concise summary of the conversation, identifying key details that the user provided that can be helpful for the contractor to determine the nature of the job and if they should accept the job. The key details should include information such as:
+"customer name",
+"project",
+"project timeframe",
+"job site address",
+"email address"
+"availability for estimate appointment",
+"photos of the area that require work"
+
+Extract all the key details and include in the summary. 
+
 Conversation:
-{Conversation}`;
+{conversation}
+
+Summary:
+`;
 export const SUMMARIZER_PROMPT_TEMPERATURE = 0.5;

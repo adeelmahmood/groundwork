@@ -4,6 +4,7 @@ import DialogComponent from "@/components/ui/DialogComponent";
 import {
     RECEPTIONIST_PROMPT,
     RECEPTIONIST_PROMPT_TEMPERATURE,
+    RECEPTIONIST_PROMPT_TYPE,
     TABLE_BUSINESS_PROMPTS,
     TABLE_REG_BUSINESSES,
 } from "@/utils/constants";
@@ -40,10 +41,11 @@ export default function Settings({ params }: { params: { id: string } }) {
 
         // set the prompt
         setPrompt(
-            bData?.business_prompts?.find((p: any) => p.prompt_type == "receptionist")?.prompt || ""
+            bData?.business_prompts?.find((p: any) => p.prompt_type == RECEPTIONIST_PROMPT_TYPE)
+                ?.prompt || ""
         );
         setTemperature(
-            bData?.business_prompts?.find((p: any) => p.prompt_type == "receptionist")
+            bData?.business_prompts?.find((p: any) => p.prompt_type == RECEPTIONIST_PROMPT_TYPE)
                 ?.temperature || 0
         );
     }

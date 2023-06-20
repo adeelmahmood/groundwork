@@ -64,12 +64,6 @@ export default function Sidebar({
                                     Interact with AI Agent
                                 </Link>
                             </div>
-
-                            <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
-                                <Link href={`/contractor/dashboard/analyze/${business?.id}`}>
-                                    Analyze Conversation
-                                </Link>
-                            </div>
                             <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
                                 <Link href={`/contractor/dashboard/settings/${business?.id}`}>
                                     Settings

@@ -4,6 +4,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
 import {
     RECEPTIONIST_PROMPT_TYPE,
+    SUMMARIZER_PROMPT_TYPE,
     TABLE_BUSINESS_PROMPTS,
     TABLE_REG_BUSINESSES,
 } from "../../../../../utils/constants";
@@ -22,9 +23,13 @@ export default function Interact({ params }: { params: { id: string } }) {
     const [chatHistory, setChatHistory] = useState<string[]>([]);
     const [chatStarted, isChatStarted] = useState(false);
 
+    const [summary, setSummary] = useState("");
+
     const [businesses, setBusinesses] = useState<any>(null);
     const [business, setBusiness] = useState<any>(null);
-    const [promptConfig, setPromptConfig] = useState<any>();
+
+    const [receptionistPromptConfig, setReceptionistPromptConfig] = useState<any>();
+    const [summarizerPromptConfig, setSummarizerPromptConfig] = useState<any>();
 
     const supabase = createClientComponentClient();
 
@@ -36,14 +41,20 @@ export default function Interact({ params }: { params: { id: string } }) {
         const bdata = data?.find((b) => b.id == id);
         setBusiness(bdata);
 
-        // retrieve receptionist prompt
+        // retrieve prompts
         const { data: config, error: promptError } = await supabase
             .from(TABLE_BUSINESS_PROMPTS)
             .select()
-            .eq("business_id", bdata?.id)
-            .eq("prompt_type", RECEPTIONIST_PROMPT_TYPE)
-            .single();
-        setPromptConfig(config);
+            .eq("business_id", bdata?.id);
+
+        if (promptError) {
+            console.log(promptError);
+        } else {
+            setReceptionistPromptConfig(
+                config.find((c) => c.prompt_type == RECEPTIONIST_PROMPT_TYPE)
+            );
+            setSummarizerPromptConfig(config.find((c) => c.prompt_type == SUMMARIZER_PROMPT_TYPE));
+        }
     }
 
     async function chat(starting: boolean = false) {
@@ -59,7 +70,7 @@ export default function Interact({ params }: { params: { id: string } }) {
                 input: chatInput,
                 history: starting ? [] : chatHistory,
                 business,
-                promptConfig,
+                promptConfig: receptionistPromptConfig,
             }),
             async onopen(response) {
                 if (
@@ -92,13 +103,30 @@ export default function Interact({ params }: { params: { id: string } }) {
         });
     }
 
+    const summarize = async () => {
+        setIsLoading(true);
+        setSummary("");
+
+        const response = await fetch("/api/ai-summarizer", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                conversation: chatHistory.join(" "),
+                promptConfig: summarizerPromptConfig,
+            }),
+        });
+        setIsLoading(false);
+        const { text: summ } = await response.json();
+        setSummary(summ);
+    };
+
     useEffect(() => {
         // start chat
-        if (business && promptConfig && !chatStarted) {
+        if (business && receptionistPromptConfig && !chatStarted) {
             isChatStarted(true);
             chat(true);
         }
-    }, [chatStarted, business, promptConfig]);
+    }, [chatStarted, business, receptionistPromptConfig]);
 
     useEffect(() => {
         loadBusinesses(params.id);
@@ -163,12 +191,14 @@ export default function Interact({ params }: { params: { id: string } }) {
 
                     <div className="mt-2 text-end">
                         <button
-                            className="text-sm btn-clear"
-                            onClick={() => navigator.clipboard.writeText(chatHistory.join("\n"))}
+                            className="btn-primary"
+                            disabled={chatHistory.length < 3 || isLoading}
+                            onClick={() => summarize()}
                         >
-                            Copy Conversation
+                            Summarize
                         </button>
                     </div>
+                    {summary && <div className="mt-4 text-lg">{summary}</div>}
                 </div>
             </div>
         </div>
