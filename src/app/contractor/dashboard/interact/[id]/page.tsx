@@ -2,7 +2,11 @@
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
-import { TABLE_RECEPTIONIST_PROMPTS, TABLE_REG_BUSINESSES } from "../../../../../utils/constants";
+import {
+    RECEPTIONIST_PROMPT_TYPE,
+    TABLE_BUSINESS_PROMPTS,
+    TABLE_REG_BUSINESSES,
+} from "../../../../../utils/constants";
 import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
 import { Answer } from "./Answer";
 import { EventStreamContentType, fetchEventSource } from "@microsoft/fetch-event-source";
@@ -32,11 +36,12 @@ export default function Interact({ params }: { params: { id: string } }) {
         const bdata = data?.find((b) => b.id == id);
         setBusiness(bdata);
 
-        // retrieve business prompt
+        // retrieve receptionist prompt
         const { data: config, error: promptError } = await supabase
-            .from(TABLE_RECEPTIONIST_PROMPTS)
+            .from(TABLE_BUSINESS_PROMPTS)
             .select()
             .eq("business_id", bdata?.id)
+            .eq("prompt_type", RECEPTIONIST_PROMPT_TYPE)
             .single();
         setPromptConfig(config);
     }
@@ -47,7 +52,7 @@ export default function Interact({ params }: { params: { id: string } }) {
         if (!starting && chatInput) setChatHistory((prev) => [...prev, "[User] " + chatInput]);
 
         const response: string[] = [];
-        const chat = await fetchEventSource("/api/aiagent", {
+        const chat = await fetchEventSource("/api/ai-receptionist", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -126,7 +131,7 @@ export default function Interact({ params }: { params: { id: string } }) {
                     {chatHistory.length > 1 && (
                         <div className="relative w-full mt-2">
                             <div className="w-full flex-1 items-center rounded-lg border px-4 py-4 shadow-md min-h-max overflow-y-auto">
-                                <div className="flex flex-col gap-6 text-gray-500">
+                                <div className="flex flex-col gap-6 text-gray-500 dark:text-gray-300">
                                     {chatHistory
                                         .slice(0, chatHistory.length - 1)
                                         .reverse()
@@ -147,13 +152,22 @@ export default function Interact({ params }: { params: { id: string } }) {
                         <input
                             type="text"
                             value={chatInput}
-                            className="ml-2 w-full appearance-none border-0 p-2 text-lg text-gray-600 focus:outline-none focus:ring-0 md:p-4 md:text-2xl bg-transparent"
+                            className="ml-2 w-full appearance-none border-0 p-2 text-lg text-gray-600 dark:text-gray-200 focus:outline-none focus:ring-0 md:p-4 md:text-2xl bg-transparent"
                             placeholder="Lets chat!"
                             onChange={(e: any) => setChatInput(e.currentTarget.value)}
                             onKeyUp={(e: any) => {
                                 if (e.keyCode == 13) chat();
                             }}
                         />
+                    </div>
+
+                    <div className="mt-2 text-end">
+                        <button
+                            className="text-sm btn-clear"
+                            onClick={() => navigator.clipboard.writeText(chatHistory.join("\n"))}
+                        >
+                            Copy Conversation
+                        </button>
                     </div>
                 </div>
             </div>

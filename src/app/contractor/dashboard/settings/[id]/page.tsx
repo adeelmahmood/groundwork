@@ -4,7 +4,7 @@ import DialogComponent from "@/components/ui/DialogComponent";
 import {
     RECEPTIONIST_PROMPT,
     RECEPTIONIST_PROMPT_TEMPERATURE,
-    TABLE_RECEPTIONIST_PROMPTS,
+    TABLE_BUSINESS_PROMPTS,
     TABLE_REG_BUSINESSES,
 } from "@/utils/constants";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -32,15 +32,20 @@ export default function Settings({ params }: { params: { id: string } }) {
     async function loadBusinesses(id: string) {
         const { data, error } = await supabase
             .from(TABLE_REG_BUSINESSES)
-            .select(`*,receptionist_prompts (*)`);
+            .select(`*,business_prompts (*)`);
 
         setBusinesses(data);
         const bData = data?.find((b) => b.id == id);
         setBusiness(bData);
 
         // set the prompt
-        setPrompt(bData?.receptionist_prompts.at(0)?.prompt || "");
-        setTemperature(bData?.receptionist_prompts.at(0)?.temperature || 0);
+        setPrompt(
+            bData?.business_prompts?.find((p: any) => p.prompt_type == "receptionist")?.prompt || ""
+        );
+        setTemperature(
+            bData?.business_prompts?.find((p: any) => p.prompt_type == "receptionist")
+                ?.temperature || 0
+        );
     }
 
     const handleDeleteBusiness = async () => {
@@ -60,7 +65,7 @@ export default function Settings({ params }: { params: { id: string } }) {
         setUpdated(false);
 
         const { error } = await supabase
-            .from(TABLE_RECEPTIONIST_PROMPTS)
+            .from(TABLE_BUSINESS_PROMPTS)
             .update({
                 prompt,
                 temperature,

@@ -1,6 +1,7 @@
 export const TABLE_REG_BUSINESSES = "registered_businesses";
-export const TABLE_RECEPTIONIST_PROMPTS = "receptionist_prompts";
+export const TABLE_BUSINESS_PROMPTS = "business_prompts";
 
+export const RECEPTIONIST_PROMPT_TYPE = "receptionist";
 export const RECEPTIONIST_PROMPT = `As a receptionist for a home improvement contractor, your role is to handle incoming lead requests via SMS in a positive and helpful manner. 
 Remember the following rules:
 1. You are a fictional character named Jamie, playing the role of a front desk receptionist.
@@ -115,3 +116,9 @@ Start the conversation by greeting the user.
 `;
 
 export const RECEPTIONIST_PROMPT_TEMPERATURE = 0.5;
+
+export const SUMMARIZER_PROMPT_TYPE = "summarizer";
+export const SUMMARIZER_PROMPT = `Summarize the follwing conversation between an AI receptionist and a human customer.
+Conversation:
+{Conversation}`;
+export const SUMMARIZER_PROMPT_TEMPERATURE = 0.5;

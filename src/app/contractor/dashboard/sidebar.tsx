@@ -31,7 +31,11 @@ export default function Sidebar({
                     </button>
                 </div>
             )}
-            <aside className={`${!open ? "hidden lg:block" : "fixed block bg-gray-50"}`}>
+            <aside
+                className={`${
+                    !open ? "hidden lg:block" : "fixed block bg-gray-50 dark:bg-gray-800"
+                }`}
+            >
                 <div className="h-screen w-72 border-r border-t border-b border-gray-300 shadow-md rounded-md dark:border-slate-400">
                     {open && (
                         <div>
@@ -60,11 +64,12 @@ export default function Sidebar({
                                     Interact with AI Agent
                                 </Link>
                             </div>
-                            {/* {business && (
-                        <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
-                            Analyze Conversations
-                        </div>
-                    )} */}
+
+                            <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
+                                <Link href={`/contractor/dashboard/analyze/${business?.id}`}>
+                                    Analyze Conversation
+                                </Link>
+                            </div>
                             <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
                                 <Link href={`/contractor/dashboard/settings/${business?.id}`}>
                                     Settings

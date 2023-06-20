@@ -4,7 +4,11 @@ import { NextResponse } from "next/server";
 import {
     RECEPTIONIST_PROMPT,
     RECEPTIONIST_PROMPT_TEMPERATURE,
-    TABLE_RECEPTIONIST_PROMPTS,
+    RECEPTIONIST_PROMPT_TYPE,
+    SUMMARIZER_PROMPT,
+    SUMMARIZER_PROMPT_TEMPERATURE,
+    SUMMARIZER_PROMPT_TYPE,
+    TABLE_BUSINESS_PROMPTS,
     TABLE_REG_BUSINESSES,
 } from "../../../utils/constants";
 import { PineconeClient } from "@pinecone-database/pinecone";
@@ -23,7 +27,30 @@ export async function POST(request: Request) {
     // } = await supabase.auth.getSession();
 
     // remove relations
-    const { receptionist_prompts, ...bus } = business;
+    const { business_prompts, ...bus } = business;
+
+    const savePrompt = async (business: any, promptConfig: any) => {
+        const { data: d, error: e } = await supabase
+            .from(TABLE_BUSINESS_PROMPTS)
+            .select()
+            .eq("business_id", business.id)
+            .eq("prompt_type", promptConfig.promptType)
+            .single();
+        if (e) {
+            console.log("error in looking up prompt", e.message);
+        }
+        if (!d) {
+            const { error: e1 } = await supabase.from(TABLE_BUSINESS_PROMPTS).insert({
+                prompt: promptConfig.prompt,
+                temperature: promptConfig.temperature,
+                prompt_type: promptConfig.promptType,
+                business_id: business.id,
+            });
+            if (e1) {
+                console.log("error in saving prompt", e1.message);
+            }
+        }
+    };
 
     // save business
     const { data, error } = await supabase
@@ -39,24 +66,17 @@ export async function POST(request: Request) {
         console.log("error in saving business", error);
     }
 
-    // check if we dont have a prompt for this business yet
-    const { data: promptData, error: promptError } = await supabase
-        .from(TABLE_RECEPTIONIST_PROMPTS)
-        .select()
-        .eq("business_id", data?.id)
-        .single();
-    if (!promptData) {
-        // save receptionist prompt
-        const { error: pError } = await supabase.from(TABLE_RECEPTIONIST_PROMPTS).insert({
-            prompt: RECEPTIONIST_PROMPT,
-            temperature: RECEPTIONIST_PROMPT_TEMPERATURE,
-            business_id: data?.id,
-        });
-
-        if (pError) {
-            console.log("error in saving prompt", pError);
-        }
-    }
+    // save prompts
+    await savePrompt(data, {
+        promptType: RECEPTIONIST_PROMPT_TYPE,
+        prompt: RECEPTIONIST_PROMPT,
+        temperature: RECEPTIONIST_PROMPT_TEMPERATURE,
+    });
+    await savePrompt(data, {
+        promptType: SUMMARIZER_PROMPT_TYPE,
+        prompt: SUMMARIZER_PROMPT,
+        temperature: SUMMARIZER_PROMPT_TEMPERATURE,
+    });
 
     // Send request to Inngest to crawl the business website
     // if (!data?.crawl_completed) {
