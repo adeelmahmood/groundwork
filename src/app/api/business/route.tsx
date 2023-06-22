@@ -2,12 +2,7 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import {
-    RECEPTIONIST_PROMPT,
-    RECEPTIONIST_PROMPT_TEMPERATURE,
-    RECEPTIONIST_PROMPT_TYPE,
-    SUMMARIZER_PROMPT,
-    SUMMARIZER_PROMPT_TEMPERATURE,
-    SUMMARIZER_PROMPT_TYPE,
+    PROMPTSCONFIG,
     TABLE_BUSINESS_PROMPTS,
     TABLE_REG_BUSINESSES,
 } from "../../../utils/constants";
@@ -67,16 +62,16 @@ export async function POST(request: Request) {
     }
 
     // save prompts
-    await savePrompt(data, {
-        promptType: RECEPTIONIST_PROMPT_TYPE,
-        prompt: RECEPTIONIST_PROMPT,
-        temperature: RECEPTIONIST_PROMPT_TEMPERATURE,
-    });
-    await savePrompt(data, {
-        promptType: SUMMARIZER_PROMPT_TYPE,
-        prompt: SUMMARIZER_PROMPT,
-        temperature: SUMMARIZER_PROMPT_TEMPERATURE,
-    });
+    const promptConfig = PROMPTSCONFIG as any;
+    await Promise.all(
+        promptConfig.map(async (config: any) => {
+            await savePrompt(data, {
+                promptType: config.promptType,
+                prompt: config.prompt,
+                temperature: config.temperature,
+            });
+        })
+    );
 
     // Send request to Inngest to crawl the business website
     // if (!data?.crawl_completed) {

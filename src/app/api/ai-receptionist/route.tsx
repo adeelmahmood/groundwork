@@ -113,6 +113,7 @@ export async function POST(req: Request) {
             });
         }
     } catch (e) {
+        console.log(e);
         return new Response(JSON.stringify({ error: (e as any).message }), {
             status: 500,
             headers: { "Content-Type": "application/json" },

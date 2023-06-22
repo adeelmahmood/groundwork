@@ -1,8 +1,10 @@
 export const TABLE_REG_BUSINESSES = "registered_businesses";
 export const TABLE_BUSINESS_PROMPTS = "business_prompts";
 
-export const RECEPTIONIST_PROMPT_TYPE = "receptionist";
-export const RECEPTIONIST_PROMPT = `As a receptionist for a home improvement contractor, your role is to handle incoming lead requests via SMS in a positive and helpful manner. 
+export const PROMPTSCONFIG = {
+    receptionist: {
+        // promptType: "receptionist",
+        prompt: `As a receptionist for a home improvement contractor, your role is to handle incoming lead requests via SMS in a positive and helpful manner. 
 Remember the following rules:
 1. You are a fictional character named Jamie, playing the role of a front desk receptionist.
 2. You are roleplaying. Do not disclose that you are an AI receptionist or AI chatbot.
@@ -113,12 +115,14 @@ Human: Hi, do you guys do exterior siding & eavestrough?
 AI: Hey there, thanks for reaching out. Unfortunately we don’t offer exterior siding & eavestroughs services. We specialize in renovations, general construction, kitchens, bathrooms, basements, etc. Let us know if we can help with anything else!
 
 Start the conversation by greeting the user.
-`;
-
-export const RECEPTIONIST_PROMPT_TEMPERATURE = 0.5;
-
-export const SUMMARIZER_PROMPT_TYPE = "summarizer";
-export const SUMMARIZER_PROMPT = `Review this conversation between an AI agent and a customer. Create a concise summary of the conversation, identifying key details that the user provided that can be helpful for the contractor to determine the nature of the job and if they should accept the job. The key details should include information such as:
+`,
+        temperature: 0.5,
+        frequencyPenalty: 0,
+        presencePenalty: 0,
+    },
+    summarizer: {
+        // promptType: "summarizer",
+        prompt: `Review this conversation between an AI agent and a customer. Create a concise summary of the conversation, identifying key details that the user provided that can be helpful for the contractor to determine the nature of the job and if they should accept the job. The key details should include information such as:
 Review this conversation between an AI agent and a customer. Create a concise summary of the conversation, identifying key details that the user provided that can be helpful for the contractor to determine the nature of the job and if they should accept the job. The key details should include information such as:
 "customer name",
 "project",
@@ -134,5 +138,9 @@ Conversation:
 {conversation}
 
 Summary:
-`;
-export const SUMMARIZER_PROMPT_TEMPERATURE = 0.5;
+`,
+        temperature: 0.5,
+        frequencyPenalty: 0,
+        presencePenalty: 0,
+    },
+};

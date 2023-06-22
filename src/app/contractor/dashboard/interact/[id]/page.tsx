@@ -2,12 +2,7 @@
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
-import {
-    RECEPTIONIST_PROMPT_TYPE,
-    SUMMARIZER_PROMPT_TYPE,
-    TABLE_BUSINESS_PROMPTS,
-    TABLE_REG_BUSINESSES,
-} from "../../../../../utils/constants";
+import { TABLE_REG_BUSINESSES } from "../../../../../utils/constants";
 import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
 import { Answer } from "./Answer";
 import { EventStreamContentType, fetchEventSource } from "@microsoft/fetch-event-source";
@@ -36,25 +31,20 @@ export default function Interact({ params }: { params: { id: string } }) {
     const router = useRouter();
 
     async function loadBusinesses(id: string) {
-        const { data, error } = await supabase.from(TABLE_REG_BUSINESSES).select();
+        const { data, error } = await supabase
+            .from(TABLE_REG_BUSINESSES)
+            .select(`*,business_prompts (*)`);
         setBusinesses(data);
         const bdata = data?.find((b) => b.id == id);
         setBusiness(bdata);
 
-        // retrieve prompts
-        const { data: config, error: promptError } = await supabase
-            .from(TABLE_BUSINESS_PROMPTS)
-            .select()
-            .eq("business_id", bdata?.id);
-
-        if (promptError) {
-            console.log(promptError);
-        } else {
-            setReceptionistPromptConfig(
-                config.find((c) => c.prompt_type == RECEPTIONIST_PROMPT_TYPE)
-            );
-            setSummarizerPromptConfig(config.find((c) => c.prompt_type == SUMMARIZER_PROMPT_TYPE));
-        }
+        // set prompts
+        setReceptionistPromptConfig(
+            bdata?.business_prompts?.find((p: any) => p.prompt_type == "receptionist")
+        );
+        setSummarizerPromptConfig(
+            bdata?.business_prompts?.find((p: any) => p.prompt_type == "summarizer")
+        );
     }
 
     async function chat(starting: boolean = false) {
@@ -107,11 +97,11 @@ export default function Interact({ params }: { params: { id: string } }) {
         setIsLoading(true);
         setSummary("");
 
-        const response = await fetch("/api/ai-summarizer", {
+        const response = await fetch("/api/ai-agent", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                conversation: chatHistory.join(" "),
+                history: chatHistory.join(" "),
                 promptConfig: summarizerPromptConfig,
             }),
         });
