@@ -3,7 +3,9 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import {
     PROMPTSCONFIG,
+    SETTINGSCONFIG,
     TABLE_BUSINESS_PROMPTS,
+    TABLE_BUSINESS_SETTINGS,
     TABLE_REG_BUSINESSES,
 } from "../../../utils/constants";
 import { PineconeClient } from "@pinecone-database/pinecone";
@@ -29,20 +31,41 @@ export async function POST(request: Request) {
             .from(TABLE_BUSINESS_PROMPTS)
             .select()
             .eq("business_id", business.id)
-            .eq("prompt_type", promptConfig.promptType)
-            .single();
+            .eq("prompt_type", promptConfig.promptType);
         if (e) {
             console.log("error in looking up prompt", e.message);
         }
-        if (!d) {
+        if (!d || d?.length == 0) {
             const { error: e1 } = await supabase.from(TABLE_BUSINESS_PROMPTS).insert({
                 prompt: promptConfig.prompt,
                 temperature: promptConfig.temperature,
                 prompt_type: promptConfig.promptType,
                 business_id: business.id,
+                order: promptConfig.order,
             });
             if (e1) {
                 console.log("error in saving prompt", e1.message);
+            }
+        }
+    };
+
+    const saveSetting = async (business: any, setting: any) => {
+        const { data: d, error: e } = await supabase
+            .from(TABLE_BUSINESS_SETTINGS)
+            .select()
+            .eq("business_id", business.id)
+            .eq("setting_name", setting.name);
+        if (e) {
+            console.log("error in looking up setting", e.message);
+        }
+        if (!d || d?.length == 0) {
+            const { error: e1 } = await supabase.from(TABLE_BUSINESS_SETTINGS).insert({
+                setting_name: setting.name,
+                setting_value: setting.value,
+                business_id: business.id,
+            });
+            if (e1) {
+                console.log("error in saving setting", e1.message);
             }
         }
     };
@@ -63,13 +86,20 @@ export async function POST(request: Request) {
 
     // save prompts
     const promptConfig = PROMPTSCONFIG as any;
+    for (const k in promptConfig) {
+        await savePrompt(data, {
+            prompt: promptConfig[k].prompt,
+            temperature: promptConfig[k].temperature,
+            promptType: k,
+            order: promptConfig[k].order,
+        });
+    }
+
+    // save settings
+    const settingsConfig = SETTINGSCONFIG as any;
     await Promise.all(
-        promptConfig.map(async (config: any) => {
-            await savePrompt(data, {
-                promptType: config.promptType,
-                prompt: config.prompt,
-                temperature: config.temperature,
-            });
+        settingsConfig.map(async (setting: any) => {
+            await saveSetting(data, setting);
         })
     );
 

@@ -1,8 +1,17 @@
 export const TABLE_REG_BUSINESSES = "registered_businesses";
 export const TABLE_BUSINESS_PROMPTS = "business_prompts";
+export const TABLE_BUSINESS_SETTINGS = "business_settings";
+
+export const SETTINGSCONFIG = [
+    {
+        name: "CHATBOT_DELAY",
+        value: "30",
+    },
+];
 
 export const PROMPTSCONFIG = {
     receptionist: {
+        order: 1,
         // promptType: "receptionist",
         prompt: `As a receptionist for a home improvement contractor, your role is to handle incoming lead requests via SMS in a positive and helpful manner. 
 Remember the following rules:
@@ -121,6 +130,7 @@ Start the conversation by greeting the user.
         presencePenalty: 0,
     },
     summarizer: {
+        order: 2,
         // promptType: "summarizer",
         prompt: `Review this conversation between an AI agent and a customer. Create a concise summary of the conversation, identifying key details that the user provided that can be helpful for the contractor to determine the nature of the job and if they should accept the job. The key details should include information such as:
 Review this conversation between an AI agent and a customer. Create a concise summary of the conversation, identifying key details that the user provided that can be helpful for the contractor to determine the nature of the job and if they should accept the job. The key details should include information such as:

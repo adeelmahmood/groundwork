@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Sidebar from "../../sidebar";
 import PromptConfig from "./PromptConfig";
+import SettingConfig from "./SettingConfig";
 
 export default function Settings({ params }: { params: { id: string } }) {
     const [loading, isLoading] = useState(false);
@@ -24,9 +25,9 @@ export default function Settings({ params }: { params: { id: string } }) {
     async function loadBusinesses(id: string) {
         const { data, error } = await supabase
             .from(TABLE_REG_BUSINESSES)
-            .select(`*,business_prompts (*)`);
-
+            .select(`*, business_prompts (*), business_settings (*)`);
         setBusinesses(data);
+
         const bData = data?.find((b) => b.id == id);
         setBusiness(bData);
     }
@@ -109,9 +110,15 @@ export default function Settings({ params }: { params: { id: string } }) {
                         <div className="flex-grow border-t border-gray-400 dark:border-gray-200"></div>
                     </div>
 
-                    {business?.business_prompts?.map((prompt: any, i: number) => (
-                        <PromptConfig key={i} businessPrompt={prompt} />
+                    {business?.business_settings?.map((setting: any, i: number) => (
+                        <SettingConfig key={i} setting={setting} />
                     ))}
+
+                    {business?.business_prompts
+                        ?.sort((a: any, b: any) => (a.order > b.order ? 1 : -1))
+                        .map((prompt: any, i: number) => (
+                            <PromptConfig key={i} businessPrompt={prompt} />
+                        ))}
                 </div>
             </div>
         </>

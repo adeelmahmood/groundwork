@@ -13,6 +13,8 @@ import {
 
 export async function POST(req: Request) {
     const { input, history, business, promptConfig } = await req.json();
+    console.log("input -" + input + "-");
+    console.log("history", history);
 
     try {
         // initialize pinecone client

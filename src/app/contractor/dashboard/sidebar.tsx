@@ -1,5 +1,5 @@
 import ListBoxComponent from "@/components/ui/ListBoxComponent";
-import { Bars2Icon } from "@heroicons/react/24/solid";
+import { ArrowLeftCircleIcon, Bars2Icon } from "@heroicons/react/24/solid";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,32 +20,22 @@ export default function Sidebar({
 }) {
     const router = useRouter();
 
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(true);
 
     return (
         <>
-            {!open && (
-                <div className="lg:hidden">
-                    <button onClick={() => setOpen(!open)}>
-                        <Bars2Icon className="h-8 fill-current text-indigo-700 focus:outline-none dark:text-gray-200" />
-                    </button>
-                </div>
-            )}
-            <aside
-                className={`${
-                    !open ? "hidden lg:block" : "fixed block bg-gray-50 dark:bg-gray-800"
-                }`}
-            >
-                <div className="h-screen w-72 border-r border-t border-b border-gray-300 shadow-md rounded-md dark:border-slate-400">
-                    {open && (
-                        <div>
-                            <button onClick={() => setOpen(!open)}>
-                                <Bars2Icon className="h-8 fill-current text-indigo-700 focus:outline-none dark:text-gray-200" />
-                            </button>
-                        </div>
-                    )}
-                    {business && businesses.length && (
-                        <div className="flex flex-col">
+            <aside className={`${open ? "w-72" : "w-8"}`}>
+                <div className="h-screen border-r border-t border-b border-gray-300 shadow-md rounded-md dark:border-slate-400">
+                    <div className="relative mt-1 z-10">
+                        <Bars2Icon
+                            onClick={() => setOpen(!open)}
+                            className={`absolute h-8 fill-current text-gray-500 hover:text-gray-900 cursor-pointer rotate-90 ${
+                                !open ? "" : "-right-1"
+                            }`}
+                        />
+                    </div>
+                    {business && businesses.length && open && (
+                        <div className="mt-8 flex flex-col">
                             <div className="px-4 py-4">
                                 <ListBoxComponent
                                     value={business}

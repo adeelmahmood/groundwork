@@ -18,7 +18,7 @@ export const Answer: React.FC<AnswerProps> = ({ text }) => {
 
     return (
         <div
-            className={`prose-xl w-full text-xl ${styles.fadeIn}`}
+            className={`prose-sm lg:prose-xl w-full lg:text-xl ${styles.fadeIn}`}
             dangerouslySetInnerHTML={{ __html: text }}
         />
     );
