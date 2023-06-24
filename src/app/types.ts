@@ -15,3 +15,5 @@ export interface BusinessPrompt {
 }
 
 export interface BusinessSetting {}
+
+export interface SmsMessage {}

@@ -8,10 +8,11 @@ import { Answer } from "./Answer";
 import { EventStreamContentType, fetchEventSource } from "@microsoft/fetch-event-source";
 import Sidebar from "../../sidebar";
 import Countdown, { CountdownApi } from "react-countdown";
+import { Typing } from "./Typing";
 
 export default function Interact({ params }: { params: { id: string } }) {
     const [answer, setAnswer] = useState("");
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
     const [chatInput, setChatInput] = useState("");
@@ -164,11 +165,12 @@ export default function Interact({ params }: { params: { id: string } }) {
                 </h2>
 
                 <div className="flex flex-col mt-4">
+                    {isLoading && <Typing />}
                     {answer && (
                         <div className="relative w-full">
                             <div
                                 className={`w-full flex-1 items-center rounded-lg border px-4 py-4 shadow-md ${
-                                    isLoading && "opacity-25"
+                                    isLoading && "hidden"
                                 }`}
                             >
                                 <Answer text={answer} />
@@ -176,7 +178,7 @@ export default function Interact({ params }: { params: { id: string } }) {
                         </div>
                     )}
 
-                    <div className="relative w-full mt-2">
+                    <div className="relative w-full mt-4">
                         <div className="w-full flex-1 items-center rounded-lg border px-4 py-4 shadow-md min-h-max overflow-y-auto">
                             <div className="flex flex-col gap-6 text-gray-500 dark:text-gray-300">
                                 {chatHistory

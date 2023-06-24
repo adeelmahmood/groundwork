@@ -3,6 +3,21 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
     const res = NextResponse.next();
+
+    // twilio endpoints handle auth internally
+    if (req.nextUrl.pathname.startsWith("/api/twilio/")) {
+        if (req.headers.get("Authorization")) {
+            return res;
+        } else {
+            return new Response("Authentication required", {
+                status: 401,
+                headers: {
+                    "WWW-Authenticate": 'Basic realm="Secure Area"',
+                },
+            });
+        }
+    }
+
     const supabase = createMiddlewareClient({ req, res });
 
     const {
@@ -23,5 +38,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/contractor/:path*"],
+    matcher: ["/contractor/:path*", "/api/twilio/sms/receive"],
 };
