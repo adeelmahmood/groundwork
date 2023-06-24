@@ -1,7 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
 import { inngest } from "./client";
-import { TABLE_REG_BUSINESSES } from "@/utils/constants";
+import { TABLE_REG_BUSINESSES, TABLE_SMS_MESSAGES } from "@/utils/constants";
 import { NonRetriableError } from "inngest";
+import { getTwilioSASupabaseClient } from "@/utils/supbase";
 
 export const respondToSms = inngest.createFunction(
     {
@@ -15,59 +15,56 @@ export const respondToSms = inngest.createFunction(
     },
     { event: "sms/respond" },
     async ({ event, step }) => {
-        // create supabase client
-        console.log(event.data.authToken);
-        const supabaseClient = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            {
-                auth: {
-                    persistSession: false,
-                },
-                // global: {
-                //     headers: {
-                //         Authorization: event.data.authToken!,
-                //     },
-                // },
-            }
-        );
-
         // incoming sms data
-        const { fromPhone, toPhone, message, sid } = event.data;
-        console.log(">> RespondToSMS", fromPhone, toPhone, message, sid);
+        const { fromPhone, toPhone, messageId } = event.data;
+        console.log(">> RespondToSMS", fromPhone, toPhone, messageId);
 
-        await step.run("login and fetch data", async () => {
-            const token = await supabaseClient.auth.signInWithPassword({
-                email: "twilioserviceuser@groundwork.com",
-                password: "r2VATPnFU3afdYq",
-            });
-            console.log("after logging in", token);
+        const delay = await step.run("get business chatbot delay setting", async () => {
+            const supabaseClient = await getTwilioSASupabaseClient();
 
-            const {
-                data: { session: s2 },
-            } = await supabaseClient.auth.getSession();
-            console.log(">> ", s2?.user.email);
-
-            // retrieve business from phone
-            const { data: business, error } = await supabaseClient
+            // retrieve business settings from phone
+            const { data: business_settings, error } = await supabaseClient
                 .from(TABLE_REG_BUSINESSES)
-                .select()
+                .select(`business_settings (*)`)
                 .eq("registered_phone", toPhone)
                 .single();
             if (error) {
-                console.log("error in retrieving business with registered_phone " + toPhone, error);
+                console.log(
+                    "error in retrieving business settings with registered_phone " + toPhone,
+                    error
+                );
                 throw new NonRetriableError(
-                    "Business with registered_phone " + toPhone + " not found",
+                    "Business settings for registered_phone " + toPhone + " not found",
                     { cause: error }
                 );
             }
-            console.log(business);
+
+            // sign out
+            await supabaseClient.auth.signOut();
+
+            const { business_settings: settings } = business_settings;
+            // retrieve chatbot delay setting
+            const setting = settings?.find((s: any) => s.setting_name == "CHATBOT_DELAY") as any;
+            return setting ? setting.setting_value : 0;
         });
 
-        await step.sleep("30s");
+        delay > 0 && (await step.sleep(delay + "s"));
 
-        await step.run("Respond to SMS", async () => {
-            console.log("Responding to SMS: " + fromPhone, toPhone, message, sid);
+        await step.run("Respond to all queued SMS messages", async () => {
+            const supabaseClient = await getTwilioSASupabaseClient();
+
+            // retrieve received messages
+            const { data: messages, error } = await supabaseClient
+                .from(TABLE_SMS_MESSAGES)
+                .select()
+                .eq("from_phone", fromPhone)
+                .eq("to_phone", toPhone);
+            if (error) {
+                console.log("error in retrieving sms messages", error);
+                throw new NonRetriableError("error in retrieving sms messages", { cause: error });
+            }
+
+            console.log(messages);
         });
     }
 );

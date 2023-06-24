@@ -1,6 +1,7 @@
 export const TABLE_REG_BUSINESSES = "registered_businesses";
 export const TABLE_BUSINESS_PROMPTS = "business_prompts";
 export const TABLE_BUSINESS_SETTINGS = "business_settings";
+export const TABLE_SMS_MESSAGES = "sms_messages";
 
 export const SETTINGSCONFIG = [
     {
