@@ -1,5 +1,9 @@
 import ListBoxComponent from "@/components/ui/ListBoxComponent";
-import { ArrowLeftCircleIcon, Bars2Icon } from "@heroicons/react/24/solid";
+import {
+    ArrowLeftCircleIcon,
+    ArrowLeftOnRectangleIcon,
+    Bars2Icon,
+} from "@heroicons/react/24/solid";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -24,18 +28,18 @@ export default function Sidebar({
 
     return (
         <>
-            <aside className={`${open ? "w-72" : "w-8"}`}>
+            <aside className={`${open ? "w-72" : "w-8"} group`}>
                 <div className="h-screen border-r border-t border-b border-gray-300 shadow-md rounded-md dark:border-slate-400">
                     <div className="relative mt-1 z-10">
-                        <Bars2Icon
+                        <ArrowLeftOnRectangleIcon
                             onClick={() => setOpen(!open)}
-                            className={`absolute h-8 fill-current text-gray-500 hover:text-gray-900 cursor-pointer rotate-90 ${
-                                !open ? "" : "-right-1"
+                            className={`lg:hidden lg:group-hover:inline-block mt-1 absolute h-8 fill-current text-gray-500 hover:text-gray-900 cursor-pointer ${
+                                !open ? "rotate-180" : "-right-0 lg:-right-5"
                             }`}
                         />
                     </div>
                     {business && businesses.length && open && (
-                        <div className="mt-8 flex flex-col">
+                        <div className="mt-6 lg:mt-4 flex flex-col">
                             <div className="px-4 py-4">
                                 <ListBoxComponent
                                     value={business}
