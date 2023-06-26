@@ -34,7 +34,7 @@ export async function POST(req: Request) {
         if (command) {
             resp = (await smsProcessor.processCommand(command, data)) || "";
         } else {
-            smsProcessor.processIncomingSms(data);
+            await smsProcessor.processIncomingSms(data);
         }
 
         // respond to twilio
