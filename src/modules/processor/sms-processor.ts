@@ -63,6 +63,7 @@ export class SmsProcessor {
     }
 
     async processCommand(command: string, smsData: Record<string, any>) {
+        console.log("Received command: ", command);
         // twilio db service account
         const supabaseClient = await getTwilioSASupabaseClient();
 
@@ -79,8 +80,13 @@ export class SmsProcessor {
             switch (command) {
                 // remove all messages for this conversation
                 case "reset":
-                    await smsService.deleteMessages(fromPhone, toPhone);
+                    await smsService.deleteMessages(fromPhone, toPhone, false);
                     response = "[All previous messages deleted from and to this number]";
+                    break;
+                // remove all messages for this conversation
+                case "clear":
+                    await smsService.deleteMessages(fromPhone, toPhone);
+                    response = "[Current conversation deleted from and to this number]";
                     break;
                 // generate lead from conversation
                 case "end":

@@ -19,6 +19,7 @@ export async function POST(req: Request) {
             Object.fromEntries(data)
         );
         if (!valid) {
+            console.log("Invalid Twilio signature, Rejecting webhook call");
             return new Response("Twilio Signature not valid", {
                 status: 405,
             });

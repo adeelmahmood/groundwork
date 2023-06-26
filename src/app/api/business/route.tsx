@@ -18,12 +18,8 @@ export async function POST(request: Request) {
         data: { user },
     } = await supabase.auth.getUser();
 
-    // const {
-    //     data: { session },
-    // } = await supabase.auth.getSession();
-
     // remove relations
-    const { business_prompts, ...bus } = business;
+    const { business_prompts, business_settings, ...bus } = business;
 
     const savePrompt = async (business: any, promptConfig: any) => {
         const { data: d, error: e } = await supabase

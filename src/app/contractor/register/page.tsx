@@ -3,11 +3,11 @@
 import GetStarted from "./GetStarted";
 import Information from "./Information";
 import RegisterComp from "./Register";
+import PhoneNumber from "./PhoneNumber";
 import { useEffect, useState } from "react";
 import { CheckIcon } from "@heroicons/react/24/solid";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { TABLE_REG_BUSINESSES } from "@/utils/constants";
 import { BusinessDataService } from "@/modules/data/business-service";
 
 export default function Register() {
@@ -32,6 +32,12 @@ export default function Register() {
             component: Information,
         },
         {
+            href: "PhoneNumber",
+            title: "Phone Number",
+            completed: false,
+            component: PhoneNumber,
+        },
+        {
             href: "Register",
             title: "Register",
             completed: false,
@@ -43,6 +49,7 @@ export default function Register() {
         business_name: "",
         business_url: "",
         business_description: "",
+        registered_phone: process.env.NEXT_PUBLIC_TWILIO_PHONENUMBER,
     });
 
     const prevStage = () => {
@@ -74,6 +81,7 @@ export default function Register() {
             setBusiness({
                 ...business,
                 ...data,
+                registered_phone: process.env.NEXT_PUBLIC_TWILIO_PHONENUMBER,
             });
         }
     }

@@ -44,13 +44,20 @@ export class SmsDataService {
         return messages;
     }
 
-    async deleteMessages(fromPhone: string, toPhone: string) {
-        // delete all messages for this conversation
-        const { data, error } = await this.supabaseClient
+    async deleteMessages(fromPhone: string, toPhone: string, openOnly = true) {
+        // delete messages for this conversation
+        let query = this.supabaseClient
             .from(TABLE_SMS_MESSAGES)
             .delete()
             .in("from_phone", [fromPhone, toPhone])
             .in("to_phone", [fromPhone, toPhone]);
+
+        // openOnly = messages not attached to a generated lead
+        if (openOnly) {
+            query.is("lead_id", null);
+        }
+
+        const { error } = await query;
 
         if (error) {
             console.log(`error in deleting sms messages ${error.message}`);
