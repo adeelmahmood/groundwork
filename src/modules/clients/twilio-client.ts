@@ -9,12 +9,17 @@ export class TwilioClient {
     }
 
     async sendMessage(from: string, to: string, message: string) {
-        const sent = await this.twilio.messages.create({
-            body: message,
-            from: from,
-            to: to,
-        });
+        try {
+            const sent = await this.twilio.messages.create({
+                body: message,
+                from: from,
+                to: to,
+            });
 
-        return sent;
+            return sent;
+        } catch (e: any) {
+            console.log(`error in sending message by twilio client ${e.message}`);
+            throw new Error(`error in sending message by twilio client ${e.message}`);
+        }
     }
 }
