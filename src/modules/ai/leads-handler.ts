@@ -2,6 +2,7 @@ import { getTwilioSASupabaseClient } from "@/utils/supbase";
 import { AiLeadsClient } from "../clients/leads-client";
 import { SmsDataService } from "../data/sms-service";
 import { BusinessDataService } from "../data/business-service";
+import { LeadsDataService } from "../data/leads-service";
 
 export class AiLeadsHandler {
     private client: AiLeadsClient;
@@ -18,6 +19,8 @@ export class AiLeadsHandler {
         const businessService = new BusinessDataService(supabaseClient);
         // sms data service
         const smsService = new SmsDataService(supabaseClient);
+        // leads data service
+        const leadsService = new LeadsDataService(supabaseClient);
 
         try {
             // retrieve all messages
@@ -47,9 +50,14 @@ export class AiLeadsHandler {
 
             // call the ai agent
             const response = await this.client.generate(conversation, promptConfig);
-            console.log("handler got this", response);
+            const lead = {
+                ...response,
+                business_id: business.id,
+            };
 
-            return response;
+            // save this lead
+            const saved = await leadsService.insertLead(lead, messages);
+            return saved;
         } catch (e) {
             throw e;
         } finally {

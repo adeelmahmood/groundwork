@@ -1,9 +1,5 @@
 import ListBoxComponent from "@/components/ui/ListBoxComponent";
-import {
-    ArrowLeftCircleIcon,
-    ArrowLeftOnRectangleIcon,
-    Bars2Icon,
-} from "@heroicons/react/24/solid";
+import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/solid";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -52,6 +48,11 @@ export default function Sidebar({
                             </div>
                             <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer py-4">
                                 <Link href={`/contractor/dashboard/${business?.id}`}>Home</Link>
+                            </div>
+                            <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
+                                <Link href={`/contractor/dashboard/leads/${business?.id}`}>
+                                    Leads
+                                </Link>
                             </div>
                             <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
                                 <Link href={`/contractor/dashboard/interact/${business?.id}`}>

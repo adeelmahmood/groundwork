@@ -2,6 +2,7 @@ export const TABLE_REG_BUSINESSES = "registered_businesses";
 export const TABLE_BUSINESS_PROMPTS = "business_prompts";
 export const TABLE_BUSINESS_SETTINGS = "business_settings";
 export const TABLE_SMS_MESSAGES = "sms_messages";
+export const TABLE_LEADS = "leads";
 
 export const SETTINGSCONFIG = [
     {
@@ -133,21 +134,13 @@ Start the conversation by greeting the user.
     summarizer: {
         order: 2,
         // promptType: "summarizer",
-        prompt: `Review this conversation between an AI agent and a customer. Create a concise summary of the conversation, identifying key details that the user provided that can be helpful for the contractor to determine the nature of the job and if they should accept the job. The key details should include information such as:
-"customer name",
-"project",
-"project timeframe",
-"job site address",
-"email address"
-"availability for estimate appointment",
-"photos of the area that require work"
-
-Extract all the key details and include in the summary. 
+        prompt: `Review this conversation between an AI agent and a customer. Extract key details that the user provided that can be helpful for the contractor to determine the nature of the job and if they should accept the job.
 
 Conversation:
 {conversation}
 
 {format_instructions}
+Only respond with the JSON and no additional text.
 `,
         temperature: 0.5,
         frequencyPenalty: 0,

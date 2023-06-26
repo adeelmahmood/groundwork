@@ -20,12 +20,12 @@ export const respondToSms = inngest.createFunction(
 
         // incoming sms data
         const { fromPhone, toPhone, responseDelay } = event.data;
-        console.log(">> RespondToSMS", fromPhone, toPhone, responseDelay);
+        // console.log(">> RespondToSMS", fromPhone, toPhone, responseDelay);
 
         event.data.responseDelay > 0 && (await step.sleep(event.data.responseDelay + "s"));
 
         const aiMessage = await step.run("Generate AI response", async () => {
-            console.log(">>> Now generating AI response...");
+            // console.log(">>> Now generating AI response...");
 
             try {
                 return await aiReceptionist.generateResponse(fromPhone, toPhone);
@@ -36,7 +36,7 @@ export const respondToSms = inngest.createFunction(
 
         aiMessage &&
             (await step.run("Respond with AI message", async () => {
-                console.log(">>> Now sending AI response...");
+                // console.log(">>> Now sending AI response...");
 
                 try {
                     await aiReceptionist.sendResponse(fromPhone, toPhone, aiMessage);

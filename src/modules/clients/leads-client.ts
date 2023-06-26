@@ -16,7 +16,6 @@ export class AiLeadsClient {
         });
 
         const data = await response.json();
-        console.log("client got this", data);
 
         if (response.status !== 200) {
             console.log(`error in calling ai leads gen ${data.error}`);

@@ -4,7 +4,7 @@ import { OpenAI } from "langchain/llms/openai";
 
 export async function POST(req: Request) {
     const { history, promptConfig } = await req.json();
-    console.log({ history, promptConfig });
+    // console.log({ history, promptConfig });
 
     try {
         const prompt = PromptTemplate.fromTemplate(promptConfig.prompt);

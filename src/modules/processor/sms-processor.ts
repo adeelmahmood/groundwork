@@ -84,9 +84,8 @@ export class SmsProcessor {
                     break;
                 // generate lead from conversation
                 case "end":
-                    const resp = await leadsHandler.generateLead(fromPhone, toPhone);
-                    console.log(JSON.stringify(resp));
-                    response = "Lead generated";
+                    const lead = await leadsHandler.generateLead(fromPhone, toPhone);
+                    response = lead ? "[Lead generated]" : "[]";
                     break;
             }
 

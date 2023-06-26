@@ -21,14 +21,20 @@ export class SmsDataService {
         }
     }
 
-    async retrieveMessages(fromPhone: string, toPhone: string) {
+    async retrieveMessages(fromPhone: string, toPhone: string, openOnly = true) {
         // retrieve messages received and sent
-        const { data: messages, error } = await this.supabaseClient
+        let query = this.supabaseClient
             .from(TABLE_SMS_MESSAGES)
             .select()
             .in("from_phone", [fromPhone, toPhone])
-            .in("to_phone", [fromPhone, toPhone])
-            .order("created_at");
+            .in("to_phone", [fromPhone, toPhone]);
+
+        // openOnly = messages not attached to a generated lead
+        if (openOnly) {
+            query.is("lead_id", null);
+        }
+
+        const { data: messages, error } = await query.order("created_at");
 
         if (error) {
             console.log(`error in retrieving user sms messages ${error.message}`);

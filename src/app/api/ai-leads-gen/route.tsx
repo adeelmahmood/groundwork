@@ -5,16 +5,16 @@ import { StructuredOutputParser } from "langchain/output_parsers";
 
 export async function POST(req: Request) {
     const { conversation, promptConfig } = await req.json();
-    console.log({ conversation, promptConfig });
+    // console.log({ conversation, promptConfig });
 
     try {
         const parser = StructuredOutputParser.fromNamesAndDescriptions({
-            name: "Name of the customer",
-            jobDetails: "Any details about the job/project",
+            customer_name: "Name of the customer",
+            job_details: "Any details about the job/project",
             timing: "Any timing information that the customer mentioned towards the start or completion of the project",
-            address: "Address of the job site",
-            email: "Email of the customer",
-            availability: "Customer availability for an appointment",
+            customer_address: "Address of the job site",
+            customer_email: "Email of the customer",
+            customer_availability: "Customer availability for an appointment",
         });
 
         const formatInstructions = parser.getFormatInstructions();
@@ -25,13 +25,11 @@ export async function POST(req: Request) {
             partialVariables: { format_instructions: formatInstructions },
         });
         const input = await prompt.format({ conversation: conversation.join("\n") });
-        console.log(input);
+        // console.log(input);
 
         const llm = new OpenAI({ temperature: promptConfig.temperature });
         const response = await llm.call(input);
         const json = JSON.parse(response);
-        console.log(">> response", response);
-        console.log(">> json", json);
 
         return new Response(JSON.stringify({ response: json }), {
             headers: { "Content-Type": "application/json" },
