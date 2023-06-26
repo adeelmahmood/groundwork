@@ -134,7 +134,6 @@ Start the conversation by greeting the user.
         order: 2,
         // promptType: "summarizer",
         prompt: `Review this conversation between an AI agent and a customer. Create a concise summary of the conversation, identifying key details that the user provided that can be helpful for the contractor to determine the nature of the job and if they should accept the job. The key details should include information such as:
-Review this conversation between an AI agent and a customer. Create a concise summary of the conversation, identifying key details that the user provided that can be helpful for the contractor to determine the nature of the job and if they should accept the job. The key details should include information such as:
 "customer name",
 "project",
 "project timeframe",
@@ -148,7 +147,7 @@ Extract all the key details and include in the summary.
 Conversation:
 {conversation}
 
-Summary:
+{format_instructions}
 `,
         temperature: 0.5,
         frequencyPenalty: 0,

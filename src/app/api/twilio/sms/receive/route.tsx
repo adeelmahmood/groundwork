@@ -26,13 +26,22 @@ export async function POST(req: Request) {
 
         // process the incoming sms message
         const smsProcessor = new SmsProcessor();
-        smsProcessor.processIncomingSms(data);
+        let resp = "";
+
+        // command or message
+        const message = data.get("Body")?.toString().toLowerCase().trim();
+        const command = message?.startsWith("/") ? message.split("/")[1] : null;
+        if (command) {
+            resp = (await smsProcessor.processCommand(command, data)) || "";
+        } else {
+            smsProcessor.processIncomingSms(data);
+        }
 
         // respond to twilio
         const twiml = new MessagingResponse();
-        const resp = twiml.message("");
+        const response = twiml.message(resp);
 
-        return new Response(resp.toString(), {
+        return new Response(response.toString(), {
             headers: { "Content-Type": "text/xml" },
         });
     } catch (e) {

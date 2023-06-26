@@ -8,7 +8,6 @@ import {
     TABLE_BUSINESS_SETTINGS,
     TABLE_REG_BUSINESSES,
 } from "../../../utils/constants";
-import { PineconeClient } from "@pinecone-database/pinecone";
 
 export async function POST(request: Request) {
     const { business } = await request.json();
@@ -117,15 +116,15 @@ export async function POST(request: Request) {
     return NextResponse.json(data);
 }
 
-let pinecone: PineconeClient | null = null;
-async function initPineconeClient() {
-    pinecone = new PineconeClient();
-    console.log("init pinecone");
-    await pinecone.init({
-        environment: process.env.PINECONE_ENVIRONMENT!,
-        apiKey: process.env.PINECONE_API_KEY!,
-    });
-}
+// let pinecone: PineconeClient | null = null;
+// async function initPineconeClient() {
+//     pinecone = new PineconeClient();
+//     console.log("init pinecone");
+//     await pinecone.init({
+//         environment: process.env.PINECONE_ENVIRONMENT!,
+//         apiKey: process.env.PINECONE_API_KEY!,
+//     });
+// }
 
 export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -145,10 +144,10 @@ export async function DELETE(request: Request) {
         console.log("deleting " + data.id + " and got " + de);
 
         // delete pinecone index
-        await initPineconeClient();
-        await pinecone!
-            .Index("groundwork-contractors")
-            .delete1({ deleteAll: true, namespace: data.id });
+        // await initPineconeClient();
+        // await pinecone!
+        //     .Index("groundwork-contractors")
+        //     .delete1({ deleteAll: true, namespace: data.id });
 
         return NextResponse.json({ success: true });
     }

@@ -1,7 +1,6 @@
 "use client";
 
 import DialogComponent from "@/components/ui/DialogComponent";
-import { TABLE_REG_BUSINESSES } from "@/utils/constants";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,6 +8,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "../../sidebar";
 import PromptConfig from "./PromptConfig";
 import SettingConfig from "./SettingConfig";
+import { BusinessDataService } from "@/modules/data/business-service";
 
 export default function Settings({ params }: { params: { id: string } }) {
     const [loading, isLoading] = useState(false);
@@ -22,10 +22,10 @@ export default function Settings({ params }: { params: { id: string } }) {
 
     const router = useRouter();
 
+    const service = new BusinessDataService(supabase);
+
     async function loadBusinesses(id: string) {
-        const { data, error } = await supabase
-            .from(TABLE_REG_BUSINESSES)
-            .select(`*, business_prompts (*), business_settings (*)`);
+        const data = await service.retrieveAllBusinesses();
         setBusinesses(data);
 
         const bData = data?.find((b) => b.id == id);

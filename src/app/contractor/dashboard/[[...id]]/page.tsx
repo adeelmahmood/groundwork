@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { TABLE_REG_BUSINESSES } from "@/utils/constants";
 import Sidebar from "../sidebar";
 import { useRouter } from "next/navigation";
+import { BusinessDataService } from "@/modules/data/business-service";
 
 export default function Dashboard({ params }: { params: { id: string } }) {
     const [businesses, setBusinesses] = useState<any>(null);
@@ -14,8 +14,10 @@ export default function Dashboard({ params }: { params: { id: string } }) {
 
     const supabase = createClientComponentClient();
 
+    const service = new BusinessDataService(supabase);
+
     async function loadBusinesses(id: string) {
-        const { data, error } = await supabase.from(TABLE_REG_BUSINESSES).select();
+        const data = await service.retrieveAllBusinesses();
         setBusinesses(data);
 
         if (!id && data?.length) {

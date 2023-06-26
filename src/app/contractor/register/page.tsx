@@ -8,11 +8,14 @@ import { CheckIcon } from "@heroicons/react/24/solid";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { TABLE_REG_BUSINESSES } from "@/utils/constants";
+import { BusinessDataService } from "@/modules/data/business-service";
 
 export default function Register() {
     const searchParams = useSearchParams();
 
     const supabase = createClientComponentClient();
+
+    const service = new BusinessDataService(supabase);
 
     const [stage, setStage] = useState("GetStarted");
     const [stages, setStages] = useState([
@@ -66,12 +69,7 @@ export default function Register() {
     };
 
     async function loadBusiness(id: string) {
-        const { data, error } = await supabase
-            .from(TABLE_REG_BUSINESSES)
-            .select()
-            .eq("id", id)
-            .single();
-
+        const data = await service.retrieveBusinessById(id);
         if (data) {
             setBusiness({
                 ...business,

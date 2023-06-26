@@ -2,6 +2,8 @@ import { getTwilioSASupabaseClient } from "@/utils/supbase";
 import { BusinessDataService } from "../data/business-service";
 import { SmsDataService } from "../data/sms-service";
 import { inngest } from "@/inngest/client";
+import { TABLE_SMS_MESSAGES } from "@/utils/constants";
+import { AiLeadsHandler } from "../ai/leads-handler";
 
 export class SmsProcessor {
     constructor() {}
@@ -52,6 +54,43 @@ export class SmsProcessor {
                 name: "sms/respond",
                 data: { fromPhone, toPhone, responseDelay },
             });
+        } catch (e) {
+            throw e;
+        } finally {
+            // make sure to close the db connection
+            await supabaseClient.auth.signOut();
+        }
+    }
+
+    async processCommand(command: string, smsData: Record<string, any>) {
+        // twilio db service account
+        const supabaseClient = await getTwilioSASupabaseClient();
+
+        // sms data service
+        const smsService = new SmsDataService(supabaseClient);
+        // ai leads handler
+        const leadsHandler = new AiLeadsHandler();
+
+        try {
+            const fromPhone = smsData.get("From");
+            const toPhone = smsData.get("To");
+            let response;
+
+            switch (command) {
+                // remove all messages for this conversation
+                case "reset":
+                    await smsService.deleteMessages(fromPhone, toPhone);
+                    response = "[All previous messages deleted from and to this number]";
+                    break;
+                // generate lead from conversation
+                case "end":
+                    const resp = await leadsHandler.generateLead(fromPhone, toPhone);
+                    console.log(JSON.stringify(resp));
+                    response = "Lead generated";
+                    break;
+            }
+
+            return response;
         } catch (e) {
             throw e;
         } finally {

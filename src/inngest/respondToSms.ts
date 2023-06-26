@@ -1,6 +1,6 @@
+import { AiReceptionist } from "@/modules/ai/receptionist";
 import { inngest } from "./client";
 import { NonRetriableError } from "inngest";
-import { AiReceptionist } from "@/modules/ai/ai-receptionist";
 
 export const respondToSms = inngest.createFunction(
     {
@@ -37,7 +37,6 @@ export const respondToSms = inngest.createFunction(
         aiMessage &&
             (await step.run("Respond with AI message", async () => {
                 console.log(">>> Now sending AI response...");
-                console.log(aiMessage);
 
                 try {
                     await aiReceptionist.sendResponse(fromPhone, toPhone, aiMessage);

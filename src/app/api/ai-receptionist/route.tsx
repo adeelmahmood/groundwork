@@ -97,17 +97,14 @@ export async function POST(req: Request) {
                 headers: { "Content-Type": "text/event-stream" },
             });
         } else {
-            console.log("about to create chain and mode");
             const llm = new ChatOpenAI({ temperature: promptConfig.temperature });
             const chain = new ConversationChain({
                 memory: memory,
                 prompt: prompt,
                 llm: llm,
             });
-            console.log("about to call the chain");
 
             const response = await chain.call({ input });
-            console.log("chain ran", response);
             return new Response(JSON.stringify(response), {
                 headers: { "Content-Type": "application/json" },
             });

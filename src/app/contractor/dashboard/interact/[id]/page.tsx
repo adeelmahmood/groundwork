@@ -2,13 +2,13 @@
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
-import { TABLE_REG_BUSINESSES } from "../../../../../utils/constants";
 import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
 import { Answer } from "./Answer";
 import { EventStreamContentType, fetchEventSource } from "@microsoft/fetch-event-source";
 import Sidebar from "../../sidebar";
 import Countdown, { CountdownApi } from "react-countdown";
 import { Typing } from "./Typing";
+import { BusinessDataService } from "@/modules/data/business-service";
 
 export default function Interact({ params }: { params: { id: string } }) {
     const [answer, setAnswer] = useState("");
@@ -31,6 +31,8 @@ export default function Interact({ params }: { params: { id: string } }) {
 
     const supabase = createClientComponentClient();
 
+    const service = new BusinessDataService(supabase);
+
     let countdownApi: CountdownApi | null = null;
     const [countdownState, setCountdownState] = useState({ date: Date.now() });
     const setCountdownRef = (countdown: Countdown | null): void => {
@@ -40,9 +42,7 @@ export default function Interact({ params }: { params: { id: string } }) {
     };
 
     async function loadBusinesses(id: string) {
-        const { data, error } = await supabase
-            .from(TABLE_REG_BUSINESSES)
-            .select(`*, business_prompts (*), business_settings (*)`);
+        const data = await service.retrieveAllBusinesses();
         setBusinesses(data);
         const bdata = data?.find((b) => b.id == id);
         setBusiness(bdata);
@@ -65,15 +65,12 @@ export default function Interact({ params }: { params: { id: string } }) {
     }
 
     // record a new message from user and start timer
-    async function message(keyCode: number) {
-        console.log("mes");
+    async function message() {
         if (chatInput?.trim()) {
             setCountdownState({ date: Date.now() + chatbotDelay * 1000 });
-            if (keyCode == 13 && chatInput) {
-                setChatHistory((prev) => [...prev, "[User] " + chatInput]);
-                setChatInput("");
-                isChatRequested(true);
-            }
+            setChatHistory((prev) => [...prev, "[User] " + chatInput]);
+            setChatInput("");
+            isChatRequested(true);
         }
     }
 
@@ -124,15 +121,15 @@ export default function Interact({ params }: { params: { id: string } }) {
         isChatRequested(false);
     }
 
-    const summarize = async () => {
+    const generateLead = async () => {
         setIsLoading(true);
         setSummary("");
 
-        const response = await fetch("/api/ai-agent", {
+        const response = await fetch("/api/ai-leads-gen", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                history: chatHistory.join("\n"),
+                conversation: chatHistory.join("\n"),
                 promptConfig: summarizerPromptConfig,
             }),
         });
@@ -165,7 +162,7 @@ export default function Interact({ params }: { params: { id: string } }) {
                 </h2>
 
                 <div className="flex flex-col mt-4">
-                    {isLoading && <Typing />}
+                    {/* {isLoading && <Typing />} */}
                     {answer && (
                         <div className="relative w-full">
                             <div
@@ -204,7 +201,7 @@ export default function Interact({ params }: { params: { id: string } }) {
                             placeholder="Lets chat!"
                             onChange={(e: any) => setChatInput(e.currentTarget.value)}
                             onKeyUp={(e: any) => {
-                                message(e.keyCode);
+                                if (e.keyCode == 13) message();
                             }}
                         />
                     </div>
@@ -224,7 +221,7 @@ export default function Interact({ params }: { params: { id: string } }) {
                         <button
                             className="btn-primary"
                             disabled={chatHistory.length < 3 || isLoading}
-                            onClick={() => summarize()}
+                            onClick={() => generateLead()}
                         >
                             Summarize
                         </button>

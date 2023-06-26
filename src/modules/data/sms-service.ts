@@ -37,4 +37,18 @@ export class SmsDataService {
 
         return messages;
     }
+
+    async deleteMessages(fromPhone: string, toPhone: string) {
+        // delete all messages for this conversation
+        const { data, error } = await this.supabaseClient
+            .from(TABLE_SMS_MESSAGES)
+            .delete()
+            .in("from_phone", [fromPhone, toPhone])
+            .in("to_phone", [fromPhone, toPhone]);
+
+        if (error) {
+            console.log(`error in deleting sms messages ${error.message}`);
+            throw new Error(`error in deleting sms message ${error.message}`);
+        }
+    }
 }

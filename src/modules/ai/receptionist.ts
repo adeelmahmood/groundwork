@@ -1,8 +1,8 @@
 import { getTwilioSASupabaseClient } from "@/utils/supbase";
-import { AiReceptionistClient } from "../clients/ai-receptionist-client";
 import { BusinessDataService } from "../data/business-service";
 import { SmsDataService } from "../data/sms-service";
 import { TwilioClient } from "../clients/twilio-client";
+import { AiReceptionistClient } from "../clients/receptionist-client";
 
 export class AiReceptionist {
     private client: AiReceptionistClient;
@@ -25,6 +25,10 @@ export class AiReceptionist {
             const messages = await smsService.retrieveMessages(fromPhone, toPhone);
             if (messages.length == 0) {
                 console.log("no messages to process, returning");
+                return;
+            }
+            if (messages[messages.length - 1].speaker == "Assistant") {
+                console.log("already responded");
                 return;
             }
 
@@ -74,7 +78,7 @@ export class AiReceptionist {
                 to_phone: fromPhone,
                 message,
                 sid: sent.sid,
-                speaker: "AI",
+                speaker: "Assistant",
                 status: "Sent",
             });
         } catch (e) {
@@ -87,8 +91,7 @@ export class AiReceptionist {
 
     extractInputAndHistory(messages: any) {
         // input is the most recent message
-        const lastMessage = messages[messages.length - 1];
-        const input = "[" + lastMessage.speaker + "] " + lastMessage.message.trim();
+        const input = messages[messages.length - 1].message.trim();
         // everything else becomes history
         const history = messages
             .slice(0, messages.length - 1)
