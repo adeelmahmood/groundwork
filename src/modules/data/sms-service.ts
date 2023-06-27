@@ -1,5 +1,5 @@
 import { TABLE_SMS_MESSAGES } from "@/utils/constants";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 
 export class SmsDataService {
     private supabaseClient: SupabaseClient;

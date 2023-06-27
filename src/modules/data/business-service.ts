@@ -1,5 +1,5 @@
 import { TABLE_REG_BUSINESSES } from "@/utils/constants";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 
 export class BusinessDataService {
     private supabaseClient: SupabaseClient;
@@ -11,8 +11,8 @@ export class BusinessDataService {
     async retrieveAllBusinesses() {
         const { data: businesses, error } = await this.supabaseClient
             .from(TABLE_REG_BUSINESSES)
-            .select(`*, business_prompts (*), business_settings (*)`);
-
+            .select(`*, business_prompts (*), business_settings (*)`)
+            .order("created_at", { ascending: false });
         if (error) {
             console.log(`error in retrieving all businesses: ${error}`);
             throw new Error(`error in retrieving all businesses: ${error}`);

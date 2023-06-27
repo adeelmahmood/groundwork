@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import Sidebar from "../sidebar";
+import SidebarComponent from "../sidebar";
 import { useRouter } from "next/navigation";
 import { BusinessDataService } from "@/modules/data/business-service";
 
@@ -23,7 +23,7 @@ export default function Dashboard({ params }: { params: { id: string } }) {
         if (!id && data?.length) {
             router.replace(`/contractor/dashboard/${data?.at(0)?.id}`);
         } else {
-            setBusiness(data?.find((b) => b.id == id));
+            setBusiness(data?.find((b: any) => b.id == id));
         }
     }
 
@@ -31,10 +31,12 @@ export default function Dashboard({ params }: { params: { id: string } }) {
         loadBusinesses(params.id);
     }, [supabase, params]);
 
+    if (!business) return;
+
     return (
         <>
             <div className="flex">
-                <Sidebar businesses={businesses} business={business} />
+                <SidebarComponent businesses={businesses} business={business} />
 
                 <div className="container mx-auto p-6">
                     <h2 className="max-w-6xl text-5xl font-bold tracking-wider text-white mt-8">

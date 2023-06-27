@@ -5,10 +5,11 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Sidebar from "../../sidebar";
+import SidebarComponent from "../../sidebar";
 import PromptConfig from "./PromptConfig";
 import SettingConfig from "./SettingConfig";
 import { BusinessDataService } from "@/modules/data/business-service";
+import { Button } from "flowbite-react";
 
 export default function Settings({ params }: { params: { id: string } }) {
     const [loading, isLoading] = useState(false);
@@ -28,7 +29,7 @@ export default function Settings({ params }: { params: { id: string } }) {
         const data = await service.retrieveAllBusinesses();
         setBusinesses(data);
 
-        const bData = data?.find((b) => b.id == id);
+        const bData = data?.find((b: any) => b.id == id);
         setBusiness(bData);
     }
 
@@ -47,6 +48,8 @@ export default function Settings({ params }: { params: { id: string } }) {
     useEffect(() => {
         loadBusinesses(params.id);
     }, [supabase, params]);
+
+    if (!business) return;
 
     return (
         <>
@@ -72,9 +75,9 @@ export default function Settings({ params }: { params: { id: string } }) {
             </DialogComponent>
 
             <div className="flex">
-                <Sidebar businesses={businesses} business={business} />
+                <SidebarComponent businesses={businesses} business={business} />
 
-                <div className="container mx-auto p-6">
+                <div className="container mx-auto p-6 border rounded-md shadow-md">
                     <h2 className="max-w-6xl text-5xl font-bold tracking-wider text-white mt-8">
                         <span className="bg-gradient-to-r from-indigo-500 to-green-600 bg-clip-text text-transparent">
                             Settings
@@ -83,23 +86,24 @@ export default function Settings({ params }: { params: { id: string } }) {
 
                     <div className="flex flex-col mt-8">
                         <p>Edit the settings for this business</p>
-                        <Link
-                            className="btn-clear w-72 text-center mt-2"
+                        <Button
+                            className="w-72 mt-2"
                             href={`/contractor/register?id=${business?.id}`}
                         >
                             Edit Business
-                        </Link>
+                        </Button>
                     </div>
 
                     <div className="flex flex-col mt-8">
                         <p>Delete this business</p>
-                        <button
-                            className="btn-clear w-72 text-center mt-2"
+                        <Button
+                            className="w-72 mt-2"
+                            color="failure"
                             onClick={() => setDeleteModal(true)}
                             disabled={loading}
                         >
                             Delete Business
-                        </button>
+                        </Button>
                     </div>
 
                     <div className="mt-10 flex items-center">

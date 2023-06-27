@@ -1,140 +1,113 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowPathIcon, Bars3Icon, XMarkIcon, UserIcon } from "@heroicons/react/24/solid";
+import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
-import AvatarMenu from "./AvatarMenu";
 import { useRouter } from "next/navigation";
-import ThemeSelector from "./ui/ThemeSelector";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { Avatar, Button, Dropdown, Navbar } from "flowbite-react";
+import ThemeSelector from "@/components/ui/ThemeSelector";
 
-const Navbar = () => {
+const NavbarComponent = () => {
     const supabase = createClientComponentClient();
     const router = useRouter();
 
-    const [user, setUser] = useState({});
+    const [user, setUser] = useState(null);
+    const [userLoaded, isUserLoaded] = useState(false);
 
     async function loadUser() {
         const {
             data: { user: _user },
+            error,
         } = await supabase.auth.getUser();
         setUser(_user);
+        isUserLoaded(true);
     }
+
+    const signOut = async () => {
+        await supabase.auth.signOut();
+        setUser(null);
+        router.refresh();
+        // router.push("/");
+    };
 
     useEffect(() => {
         loadUser();
-    }, []);
+    }, [supabase]);
 
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    function getInitials(name) {
+        if (!name || name.length == 0) return;
+        const nameArray = name.split(" ");
+        const firstNameIn = nameArray[0].charAt(0).toUpperCase();
+        const lastNameIn = nameArray[nameArray.length - 1].charAt(0).toUpperCase();
+        return firstNameIn + lastNameIn;
+    }
 
     return (
         <>
-            <header className="rounded-md shadow-md lg:flex lg:items-center lg:justify-between lg:px-4 lg:py-3">
-                <div className="flex items-center justify-between px-4 py-3 lg:p-0">
-                    <div>
-                        <Link href="/" className="focus:outline-none">
-                            <ArrowPathIcon className="mb-2 inline h-6 fill-current text-gray-600 dark:text-gray-300" />
-                            <span className="px-2 text-2xl font-bold tracking-tighter text-indigo-700 dark:text-gray-200">
-                                Ground Work
-                            </span>
-                        </Link>
-                    </div>
-                    <div className="lg:hidden">
-                        <button
-                            type="button"
-                            className="block"
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        >
-                            {isMenuOpen ? (
-                                <XMarkIcon className="h-8 fill-current text-indigo-700 focus:outline-none dark:text-gray-200" />
-                            ) : (
-                                <Bars3Icon className="h-8 fill-current text-indigo-700 focus:outline-none dark:text-gray-200" />
-                            )}
-                        </button>
-                    </div>
-                </div>
-                <nav className={`${isMenuOpen ? "block" : "hidden lg:block"}`}>
-                    <div className="px-2 pb-4 pt-2 lg:flex lg:p-0">
-                        <a
-                            href="/contractor/register"
-                            className="block rounded px-2 py-1 font-semibold text-indigo-600 hover:bg-indigo-500 hover:text-white dark:text-gray-300 dark:hover:bg-slate-900"
-                        >
-                            Register Your Business
-                        </a>
-                        {user && user?.email && (
-                            <>
-                                <span className="mx-2 hidden w-0.5 bg-gray-600/25 dark:bg-gray-400/25 sm:block"></span>
-                                <a
-                                    href="/contractor/dashboard"
-                                    className="block rounded px-2 py-1 font-semibold text-indigo-600 hover:bg-indigo-500 hover:text-white dark:text-gray-300 dark:hover:bg-slate-900"
-                                >
-                                    Your Dashboard
-                                </a>
-                            </>
-                        )}
-
-                        <div className="mb-3 border-t border-indigo-400 opacity-50 dark:border-gray-200 lg:hidden" />
-                        {!user && (
-                            <div className="lg:hidden">
-                                <a
-                                    href="/login"
-                                    className="block rounded px-2 py-1 font-semibold text-indigo-600 hover:bg-indigo-500 hover:text-white dark:text-gray-300 dark:hover:bg-slate-900"
-                                >
-                                    Login <span className="font-thin">|</span> Create Account
-                                </a>
-                            </div>
-                        )}
-                        {user && (
-                            <div className="lg:hidden">
-                                <div className="flex items-center justify-between px-2 py-1">
-                                    <div className="flex items-center">
-                                        {user.user_metadata?.avatar_url ? (
-                                            <img
-                                                src={user?.user_metadata?.avatar_url}
-                                                className="h-10 w-10 rounded-full border-2 border-indigo-400 object-cover"
-                                            />
-                                        ) : (
-                                            <UserIcon className="fill-current text-indigo-700 focus:outline-none dark:text-gray-200" />
-                                        )}
-                                        <div className="ml-2">
-                                            <p className="text-sm leading-5 text-gray-800 dark:text-gray-300">
-                                                Signed in as
-                                            </p>
-                                            <p className="truncate text-sm font-medium leading-5 text-gray-800 dark:text-gray-300">
-                                                {user.user_metadata?.full_name || user?.email}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <ThemeSelector />
-                                </div>
-                                <button
-                                    href="#"
-                                    onClick={async () => {
-                                        await supabase.auth.signOut();
-                                        setUser({});
-                                        router.push("/");
-                                    }}
-                                    className="mt-2 block rounded px-2 py-1 font-semibold text-indigo-600 hover:bg-indigo-500 hover:text-white dark:text-gray-300 dark:hover:bg-slate-700"
-                                >
-                                    Sign out
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </nav>
-                <div className="hidden items-center space-x-4 lg:flex">
+            <Navbar
+                fluid
+                rounded
+                className="bg-gradient-to-b from-blue-50 to-transparent dark:from-blue-900"
+            >
+                <Navbar.Brand href="/" className="z-20">
+                    <ArrowPathIcon className="mr-3 h-6 sm:h-8 fill-current text-blue-600 dark:text-white" />
+                    <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
+                        Ground Work
+                    </span>
+                </Navbar.Brand>
+                <div className="flex z-20 md:order-2">
                     <ThemeSelector />
-                    {user ? (
-                        <AvatarMenu user={user} setUser={setUser} />
-                    ) : (
-                        <a href="/login" className="btn-primary">
-                            Login
-                        </a>
+                    {userLoaded && (
+                        <>
+                            {!user ? (
+                                <Button href="/login">Login</Button>
+                            ) : (
+                                <>
+                                    <Dropdown
+                                        inline
+                                        label={
+                                            <Avatar
+                                                alt="User settings"
+                                                img={user?.user_metadata?.avatar_url}
+                                                rounded
+                                                placeholderInitials={getInitials(
+                                                    user.user_metadata?.full_name
+                                                )}
+                                            />
+                                        }
+                                    >
+                                        <Dropdown.Header>
+                                            <span className="block text-sm">
+                                                {user.user_metadata?.full_name}
+                                            </span>
+                                            <span className="block truncate text-xs font-medium">
+                                                {user?.email}
+                                            </span>
+                                        </Dropdown.Header>
+                                        <Dropdown.Item>
+                                            <Link href="/contractor/dashboard">Dashboard</Link>
+                                        </Dropdown.Item>
+                                        <Dropdown.Divider />
+                                        <Dropdown.Item>
+                                            <button onClick={() => signOut()}>Sign out</button>
+                                        </Dropdown.Item>
+                                    </Dropdown>
+                                    <Navbar.Toggle />
+                                </>
+                            )}
+                        </>
                     )}
                 </div>
-            </header>
+                {user && (
+                    <Navbar.Collapse className="z-20">
+                        <Navbar.Link href="/contractor/register">Register Business</Navbar.Link>
+                        <Navbar.Link href="/contractor/dashboard">Dashboard</Navbar.Link>
+                    </Navbar.Collapse>
+                )}
+            </Navbar>
         </>
     );
 };
 
-export default Navbar;
+export default NavbarComponent;

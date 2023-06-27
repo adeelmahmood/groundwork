@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
 import { Answer } from "./Answer";
 import { EventStreamContentType, fetchEventSource } from "@microsoft/fetch-event-source";
-import Sidebar from "../../sidebar";
+import SidebarComponent from "../../sidebar";
 import Countdown, { CountdownApi } from "react-countdown";
 import { Typing } from "./Typing";
 import { BusinessDataService } from "@/modules/data/business-service";
@@ -44,7 +44,7 @@ export default function Interact({ params }: { params: { id: string } }) {
     async function loadBusinesses(id: string) {
         const data = await service.retrieveAllBusinesses();
         setBusinesses(data);
-        const bdata = data?.find((b) => b.id == id);
+        const bdata = data?.find((b: any) => b.id == id);
         setBusiness(bdata);
 
         // set prompts
@@ -150,11 +150,13 @@ export default function Interact({ params }: { params: { id: string } }) {
         loadBusinesses(params.id);
     }, [supabase, params]);
 
+    if (!business) return;
+
     return (
         <div className="flex">
-            <Sidebar businesses={businesses} business={business} />
+            <SidebarComponent businesses={businesses} business={business} />
 
-            <div className="container mx-auto p-6">
+            <div className="container mx-auto p-6 border rounded-md shadow-md">
                 <h2 className="max-w-6xl text-3xl lg:text-5xl font-bold tracking-wide text-white mt-2 lg:mt-8">
                     <span className="bg-gradient-to-r from-indigo-500 to-green-600 bg-clip-text text-transparent">
                         Interact with AI Receptionist

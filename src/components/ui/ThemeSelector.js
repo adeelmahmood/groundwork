@@ -18,7 +18,7 @@ export default function ThemeSelector({}) {
 
     return (
         <>
-            <div className="relative lg:mt-2">
+            <div className="relative flex items-center mr-2">
                 <Menu>
                     <Menu.Button>
                         {resolvedTheme === "dark" ? (
@@ -27,7 +27,7 @@ export default function ThemeSelector({}) {
                             <SunIcon className="h-5 w-5 fill-current text-indigo-500 focus:outline-none dark:text-gray-200" />
                         )}
                     </Menu.Button>
-                    <div className="absolute right-0 z-10 lg:right-auto lg:-left-12">
+                    <div className="absolute right-0 z-10 top-4">
                         <Menu.Items
                             as="div"
                             className="mt-2 flex flex-col divide-y divide-gray-100 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-100 lg:mt-6"

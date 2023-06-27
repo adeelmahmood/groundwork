@@ -1,8 +1,13 @@
-import ListBoxComponent from "@/components/ui/ListBoxComponent";
-import { ArrowLeftOnRectangleIcon } from "@heroicons/react/24/solid";
+import {
+    ArrowLeftCircleIcon,
+    ArrowRightCircleIcon,
+    BoltIcon,
+    ClipboardDocumentCheckIcon,
+    Cog6ToothIcon,
+    HomeIcon,
+} from "@heroicons/react/24/solid";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Sidebar } from "flowbite-react";
 import { useState } from "react";
 
 interface BusinessType {
@@ -11,63 +16,78 @@ interface BusinessType {
     business_url: string;
 }
 
-export default function Sidebar({
+export default function SidebarComponent({
     businesses,
     business,
 }: {
     businesses: BusinessType[];
     business: BusinessType;
 }) {
-    const router = useRouter();
-
-    const [open, setOpen] = useState(true);
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     return (
         <>
-            <aside className={`${open ? "w-72" : "w-8"} group`}>
-                <div className="h-screen border-r border-t border-b border-gray-300 shadow-md rounded-md dark:border-slate-400">
-                    <div className="relative mt-1 z-10">
-                        <ArrowLeftOnRectangleIcon
-                            onClick={() => setOpen(!open)}
-                            className={`lg:hidden lg:group-hover:inline-block mt-1 absolute h-8 fill-current text-gray-500 hover:text-gray-900 cursor-pointer ${
-                                !open ? "rotate-180" : "-right-0 lg:-right-5"
-                            }`}
-                        />
-                    </div>
-                    {business && businesses.length && open && (
-                        <div className="mt-6 lg:mt-4 flex flex-col">
-                            <div className="px-4 py-4">
-                                <ListBoxComponent
-                                    value={business}
-                                    setValue={(b: any) =>
-                                        router.replace(`/contractor/dashboard/${b.id}`)
-                                    }
-                                    valueDisplay={(c: any) => c?.business_name}
-                                    options={businesses}
-                                />
-                            </div>
-                            <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer py-4">
-                                <Link href={`/contractor/dashboard/${business?.id}`}>Home</Link>
-                            </div>
-                            <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
-                                <Link href={`/contractor/dashboard/leads/${business?.id}`}>
-                                    Leads
-                                </Link>
-                            </div>
-                            <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
-                                <Link href={`/contractor/dashboard/interact/${business?.id}`}>
-                                    Interact with AI Receptionist
-                                </Link>
-                            </div>
-                            <div className="px-4 hover:bg-indigo-400 hover:text-gray-50 dark:hover:bg-gray-200 dark:hover:text-gray-900 hover:cursor-pointer border-t py-4">
-                                <Link href={`/contractor/dashboard/settings/${business?.id}`}>
-                                    Settings
-                                </Link>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </aside>
+            {business && (
+                <Sidebar
+                    aria-label="Sidebar"
+                    className={`${!isCollapsed && "w-72"}`}
+                    collapsed={isCollapsed}
+                >
+                    <Sidebar.Items>
+                        <Sidebar.ItemGroup>
+                            {/* <Sidebar.Item>
+                            <p>Selected Business</p>
+                        </Sidebar.Item> */}
+                            <Sidebar.Collapse
+                                label={business.business_name}
+                                className="font-semibold"
+                            >
+                                {businesses
+                                    .filter((b) => b.id != business.id)
+                                    .map((b, i) => (
+                                        <Sidebar.Item
+                                            key={i}
+                                            href={`/contractor/dashboard/${b.id}`}
+                                        >
+                                            {b.business_name}
+                                        </Sidebar.Item>
+                                    ))}
+                            </Sidebar.Collapse>
+                            <Sidebar.Item
+                                href={`/contractor/dashboard/${business?.id}`}
+                                icon={HomeIcon}
+                            >
+                                <p>Home</p>
+                            </Sidebar.Item>
+                            <Sidebar.Item
+                                href={`/contractor/dashboard/leads/${business?.id}`}
+                                icon={ClipboardDocumentCheckIcon}
+                            >
+                                <p>Leads</p>
+                            </Sidebar.Item>
+                            <Sidebar.Item
+                                href={`/contractor/dashboard/interact/${business?.id}`}
+                                icon={BoltIcon}
+                            >
+                                <p>AI Receptionist</p>
+                            </Sidebar.Item>
+                            <Sidebar.Item
+                                href={`/contractor/dashboard/settings/${business?.id}`}
+                                icon={Cog6ToothIcon}
+                            >
+                                <p>Settings</p>
+                            </Sidebar.Item>
+                            <Sidebar.Item
+                                as="button"
+                                onClick={() => setIsCollapsed(!isCollapsed)}
+                                icon={isCollapsed ? ArrowRightCircleIcon : ArrowLeftCircleIcon}
+                            >
+                                {isCollapsed ? <span>Expand</span> : <span>Collapse</span>}
+                            </Sidebar.Item>
+                        </Sidebar.ItemGroup>
+                    </Sidebar.Items>
+                </Sidebar>
+            )}
         </>
     );
 }

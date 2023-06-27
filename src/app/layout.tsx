@@ -2,9 +2,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 
 import { Providers } from "./providers";
-import Navbar from "@/components/Navbar";
-import TopGradient from "@/components/ui/TopGradient";
-import BottomGradient from "@/components/ui/BottomGradient";
+import NavbarComponent from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,10 +20,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             ></meta>
             <body className={inter.className}>
                 <Providers>
-                    <TopGradient />
-                    <Navbar />
+                    <NavbarComponent />
                     {children}
-                    <BottomGradient />
+                    <div className="bg-gradient-to-t from-blue-50 to-transparent dark:from-blue-900 h-full w-full absolute top-1/2 left-0 -z-10"></div>
                 </Providers>
             </body>
         </html>
