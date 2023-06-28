@@ -36,7 +36,7 @@ export default function Interact({ params }: { params: { id: string } }) {
     const supabase = createClientComponentClient();
 
     const service = new BusinessDataService(supabase);
-    const client = new AiReceptionistClient();
+    const client = new AiReceptionistClient(true);
 
     let countdownApi: CountdownApi | null = null;
     const [countdownState, setCountdownState] = useState({ date: Date.now() });

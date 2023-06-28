@@ -1,24 +1,30 @@
 export class AiReceptionistClient {
-    private baseUrl: string =
-        process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL
-            ? "https://" + (process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL)
-            : "http://localhost:3000";
+    private baseUrl: string = process.env.VERCEL_URL
+        ? "https://" + process.env.VERCEL_URL
+        : "http://localhost:3000";
 
-    constructor() {}
+    private internalCall = false;
+
+    constructor(_internalCall: boolean = false) {
+        this.internalCall = _internalCall;
+    }
 
     async reply(input: string, history: string[], business: any, promptConfig: any) {
         const { business_prompts, business_settings, ...b } = business;
 
-        const response = await fetch(`${this.baseUrl}/api/ai-receptionist`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                input,
-                history,
-                business: b,
-                promptConfig,
-            }),
-        });
+        const response = await fetch(
+            `${!this.internalCall ? this.baseUrl : ""}/api/ai-receptionist`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    input,
+                    history,
+                    business: b,
+                    promptConfig,
+                }),
+            }
+        );
 
         const data = await response.json();
 

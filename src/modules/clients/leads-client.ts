@@ -1,13 +1,16 @@
 export class AiLeadsClient {
-    private baseUrl: string =
-        process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL
-            ? "https://" + (process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL)
-            : "http://localhost:3000";
+    private baseUrl: string = process.env.VERCEL_URL
+        ? "https://" + process.env.VERCEL_URL
+        : "http://localhost:3000";
 
-    constructor() {}
+    private internalCall = false;
+
+    constructor(_internalCall: boolean = false) {
+        this.internalCall = _internalCall;
+    }
 
     async generate(conversation: string[], promptConfig: any) {
-        const response = await fetch(`${this.baseUrl}/api/ai-leads-gen`, {
+        const response = await fetch(`${!this.internalCall ? this.baseUrl : ""}/api/ai-leads-gen`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
