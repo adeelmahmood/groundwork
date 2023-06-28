@@ -1,23 +1,27 @@
 "use client";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useEffect, useState } from "react";
-import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
-import { Answer } from "./Answer";
-import { EventStreamContentType, fetchEventSource } from "@microsoft/fetch-event-source";
+import { useEffect, useRef, useState } from "react";
 import SidebarComponent from "../../sidebar";
 import Countdown, { CountdownApi } from "react-countdown";
-import { Typing } from "./Typing";
 import { BusinessDataService } from "@/modules/data/business-service";
+import { TextInput } from "flowbite-react";
+import { AiReceptionistClient } from "@/modules/clients/receptionist-client";
+
+interface ChatMessage {
+    message: string;
+    speaker: string;
+}
 
 export default function Interact({ params }: { params: { id: string } }) {
-    const [answer, setAnswer] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
     const [chatInput, setChatInput] = useState("");
-    const [chatHistory, setChatHistory] = useState<string[]>([]);
     const [chatRequested, isChatRequested] = useState(false);
+
+    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+    const messagesEndRef = useRef<HTMLInputElement>(null);
 
     const [summary, setSummary] = useState("");
 
@@ -32,6 +36,7 @@ export default function Interact({ params }: { params: { id: string } }) {
     const supabase = createClientComponentClient();
 
     const service = new BusinessDataService(supabase);
+    const client = new AiReceptionistClient();
 
     let countdownApi: CountdownApi | null = null;
     const [countdownState, setCountdownState] = useState({ date: Date.now() });
@@ -64,11 +69,21 @@ export default function Interact({ params }: { params: { id: string } }) {
         }
     }
 
+    const addMessage = (message: string, speaker: string) => {
+        setChatMessages((prev) => [...prev, { message: message, speaker: speaker }]);
+    };
+
+    const getMessageAt = (index: number) => {
+        return index < chatMessages.length
+            ? `[${chatMessages[index].speaker}] ${chatMessages[index].message}`
+            : null;
+    };
+
     // record a new message from user and start timer
     async function message() {
         if (chatInput?.trim()) {
             setCountdownState({ date: Date.now() + chatbotDelay * 1000 });
-            setChatHistory((prev) => [...prev, "[User] " + chatInput]);
+            addMessage(chatInput, "User");
             setChatInput("");
             isChatRequested(true);
         }
@@ -80,43 +95,20 @@ export default function Interact({ params }: { params: { id: string } }) {
 
         setIsLoading(true);
 
-        let input = chatHistory[chatHistory.length - 1];
+        let input = getMessageAt(chatMessages.length - 1);
         input = input?.startsWith("[User] ") ? input.split("[User] ")[1] : "";
 
-        const response: string[] = [];
-        const chat = await fetchEventSource("/api/ai-receptionist", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                input: input.trim(), // last history item
-                history: chatHistory.slice(0, chatHistory.length - 1), // history except last item
-                business,
-                promptConfig: receptionistPromptConfig,
-            }),
-            async onopen(response) {
-                if (
-                    response.ok &&
-                    response.headers.get("content-type") === EventStreamContentType
-                ) {
-                    setIsLoading(false);
-                    setAnswer("");
-                    // setChatInput("");
-                    return; // everything's good
-                }
-            },
-            onmessage(ev) {
-                setAnswer((prev) => prev + ev.data);
-                response.push(ev.data);
-            },
-            onclose() {
-                if (response.length > 0) {
-                    setChatHistory((prev) => [...prev, "[Assistant] " + response.join("")]);
-                }
-            },
-            onerror(err) {
-                setError("error status in chat response: " + err);
-            },
-        });
+        const response = await client.reply(
+            input.trim(),
+            chatMessages
+                .slice(0, chatMessages.length - 1)
+                .map((cm) => `[${cm.speaker}] ${cm.message}`),
+            business,
+            receptionistPromptConfig
+        );
+
+        setIsLoading(false);
+        response && addMessage(response, "Assistant");
 
         isChatRequested(false);
     }
@@ -129,7 +121,7 @@ export default function Interact({ params }: { params: { id: string } }) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                conversation: chatHistory.join("\n"),
+                // conversation: chatHistory.join("\n"),
                 promptConfig: summarizerPromptConfig,
             }),
         });
@@ -150,6 +142,16 @@ export default function Interact({ params }: { params: { id: string } }) {
         loadBusinesses(params.id);
     }, [supabase, params]);
 
+    useEffect(() => {
+        if ((isLoading || chatMessages.length) && messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+                inline: "start",
+            });
+        }
+    }, [chatMessages, isLoading]);
+
     if (!business) return;
 
     return (
@@ -157,79 +159,75 @@ export default function Interact({ params }: { params: { id: string } }) {
             <SidebarComponent businesses={businesses} business={business} />
 
             <div className="container mx-auto p-6 border rounded-md shadow-md">
-                <h2 className="max-w-6xl text-3xl lg:text-5xl font-bold tracking-wide text-white mt-2 lg:mt-8">
+                <h2 className="max-w-6xl text-3xl lg:text-5xl font-bold tracking-wide text-white mt-2 mb-6">
                     <span className="bg-gradient-to-r from-indigo-500 to-green-600 bg-clip-text text-transparent">
-                        Interact with AI Receptionist
+                        AI Receptionist
                     </span>
                 </h2>
 
-                <div className="flex flex-col mt-4">
-                    {/* {isLoading && <Typing />} */}
-                    {answer && (
-                        <div className="relative w-full">
-                            <div
-                                className={`w-full flex-1 items-center rounded-lg border px-4 py-4 shadow-md ${
-                                    isLoading && "hidden"
-                                }`}
-                            >
-                                <Answer text={answer} />
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="relative w-full mt-4">
-                        <div className="w-full flex-1 items-center rounded-lg border px-4 py-4 shadow-md min-h-max overflow-y-auto">
-                            <div className="flex flex-col gap-6 text-gray-500 dark:text-gray-300">
-                                {chatHistory
-                                    // .slice(0, chatHistory.length - 1)
-                                    // .reverse()
-                                    .map((ch, i) => (
+                <div className="mb-8 relative mx-auto border-gray-800 dark:border-gray-800 bg-gray-800 border-[14px] rounded-[2.5rem] h-[454px] max-w-[341px] md:h-[682px] md:max-w-[512px]">
+                    <div className="h-[32px] w-[3px] bg-gray-800 dark:bg-gray-800 absolute -left-[17px] top-[72px] rounded-l-lg"></div>
+                    <div className="h-[46px] w-[3px] bg-gray-800 dark:bg-gray-800 absolute -left-[17px] top-[124px] rounded-l-lg"></div>
+                    <div className="h-[46px] w-[3px] bg-gray-800 dark:bg-gray-800 absolute -left-[17px] top-[178px] rounded-l-lg"></div>
+                    <div className="h-[64px] w-[3px] bg-gray-800 dark:bg-gray-800 absolute -right-[17px] top-[142px] rounded-r-lg"></div>
+                    <div className="rounded-[2rem] overflow-hidden h-[426px] md:h-[654px] bg-white dark:bg-gray-800">
+                        <div className="flex flex-col h-full">
+                            <div className="border-2 bg-gray-50 dark:bg-gray-100 rounded-lg mx-3 mt-4 mb-1 flex-1 text-sm overflow-y-auto">
+                                <div className="pb-2">
+                                    {chatMessages?.map((cm, i) => (
                                         <div
-                                            className="prose-sm lg:prose-em"
                                             key={i}
-                                            dangerouslySetInnerHTML={{ __html: ch }}
-                                        />
+                                            className={`mt-2 ${
+                                                cm.speaker == "User"
+                                                    ? "flex items-center justify-end"
+                                                    : "flex items-center"
+                                            }`}
+                                        >
+                                            <span
+                                                className={`max-w-sm text-white px-3 py-2 rounded-md ${
+                                                    cm.speaker == "User"
+                                                        ? "bg-blue-600 dark:bg-blue-500 mr-2"
+                                                        : "bg-gray-600 dark:bg-gray-500 ml-2"
+                                                }`}
+                                            >
+                                                {cm.message}
+                                            </span>
+                                        </div>
                                     ))}
+                                    {isLoading && (
+                                        <div className="animate-pulse text-4xl ml-2 dark:text-gray-900">
+                                            ...
+                                        </div>
+                                    )}
+                                </div>
+                                <div ref={messagesEndRef} />
+                            </div>
+                            <div className="mx-3 mb-5 mt-1">
+                                <TextInput
+                                    sizing="lg"
+                                    className="text-sm"
+                                    placeholder="Type your message here..."
+                                    value={chatInput}
+                                    onChange={(e: any) => setChatInput(e.currentTarget.value)}
+                                    onKeyUp={(e: any) => {
+                                        if (e.keyCode == 13) message();
+                                    }}
+                                ></TextInput>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div className="flex items-center rounded-lg border px-4 py-2 shadow-md mt-2">
-                        <ChatBubbleLeftIcon className="inline h-6 fill-current text-teal-700" />
-                        <input
-                            type="text"
-                            value={chatInput}
-                            className="ml-2 w-full appearance-none border-0 p-2 text-lg text-gray-600 dark:text-gray-200 focus:outline-none focus:ring-0 md:p-4 md:text-2xl bg-transparent"
-                            placeholder="Lets chat!"
-                            onChange={(e: any) => setChatInput(e.currentTarget.value)}
-                            onKeyUp={(e: any) => {
-                                if (e.keyCode == 13) message();
-                            }}
-                        />
-                    </div>
-
-                    <div className="mt-2 flex items-center justify-between">
-                        <div>
-                            <Countdown
-                                autoStart={false}
-                                ref={setCountdownRef}
-                                date={countdownState.date}
-                                renderer={({ hours, minutes, seconds }) => (
-                                    <>{seconds ? <span>Waiting... {seconds}</span> : ""}</>
-                                )}
-                                onComplete={() => chat()}
-                            />
-                        </div>
-                        <button
-                            className="btn-primary"
-                            disabled={chatHistory.length < 3 || isLoading}
-                            onClick={() => generateLead()}
-                        >
-                            Summarize
-                        </button>
-                    </div>
-
-                    {summary && <div className="mt-4 text-lg">{summary}</div>}
+                <div className="text-gray-800 dark:text-gray-200">
+                    <Countdown
+                        autoStart={false}
+                        ref={setCountdownRef}
+                        date={countdownState.date}
+                        renderer={({ hours, minutes, seconds }) => (
+                            <>{seconds ? <span>Waiting... {seconds}</span> : ""}</>
+                        )}
+                        onComplete={() => chat()}
+                    />
                 </div>
             </div>
         </div>
