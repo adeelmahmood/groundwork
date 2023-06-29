@@ -1,3 +1,4 @@
+import { Button } from "flowbite-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -32,13 +33,9 @@ export default function RegisterComp({ business, setBusiness, handle, ...rest })
                 </p>
 
                 <div className="mt-6">
-                    <button
-                        className="btn-secondary w-full"
-                        onClick={handleNext}
-                        disabled={!isCompleted}
-                    >
+                    <Button className="w-full" onClick={handleNext} disabled={!isCompleted}>
                         Complete
-                    </button>
+                    </Button>
                 </div>
             </div>
         </>

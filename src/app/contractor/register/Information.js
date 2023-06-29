@@ -1,4 +1,5 @@
 import { ArrowLongRightIcon } from "@heroicons/react/24/solid";
+import { Button, Label, TextInput, Textarea } from "flowbite-react";
 import { useEffect, useState } from "react";
 
 export default function GetStarted({ business, setBusiness, handle, ...rest }) {
@@ -33,11 +34,9 @@ export default function GetStarted({ business, setBusiness, handle, ...rest }) {
                 </h2>
 
                 <div className="mt-6">
-                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
-                        What is the name of your business
-                    </label>
-                    <input
-                        className="mb-3 w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-600 dark:focus:ring-blue-400"
+                    <Label htmlFor="name">What is the name of your business</Label>
+                    <TextInput
+                        id="name"
                         type="text"
                         value={name}
                         placeholder="Name of your business"
@@ -46,11 +45,9 @@ export default function GetStarted({ business, setBusiness, handle, ...rest }) {
                 </div>
 
                 <div className="mt-6">
-                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
-                        Website for your business
-                    </label>
-                    <input
-                        className="mb-3 w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:focus:border-blue-600 dark:focus:ring-blue-400"
+                    <Label htmlFor="url">Website for your business</Label>
+                    <TextInput
+                        id="url"
                         type="text"
                         placeholder="Website URL"
                         value={url}
@@ -59,32 +56,22 @@ export default function GetStarted({ business, setBusiness, handle, ...rest }) {
                 </div>
 
                 <div className="mt-6">
-                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
-                        Tell us about your business
-                    </label>
+                    <Label htmlFor="description">Tell us about your business</Label>
 
-                    <textarea
-                        className="mt-2 w-full rounded-lg border-gray-300 text-gray-800 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-200 dark:focus:border-teal-500 dark:focus:ring-teal-500 disabled:bg-gray-100"
+                    <Textarea
+                        id="description"
+                        helperText="We will use this information to answer any questions that the customer may have about the services that you offer. Additionally, including contact information can be helpful in directing customer inquiries"
                         rows={7}
                         placeholder="E.g. Job Roberts Construction specializes in interior renovations, including kitchens, bathrooms and basements. Jim Roberts, the owner, has been in business for over 20 years. Jim will be the individual who conducts the estimate appointment. Jim can be reached at jim@goautopilot.co. Jim Roberts Construction does not perform exterior projects, including roofing, fencing, decking, eavestroughs and siding."
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                     />
-                    <p className="text-sm  text-gray-700 dark:text-gray-200">
-                        We will use this information to answer any questions that the customer may
-                        have about the services that you offer. Additionally, including contact
-                        information can be helpful in directing customer inquiries
-                    </p>
                 </div>
 
                 <div className="mt-10">
-                    <button
-                        className="btn-secondary w-full"
-                        onClick={handleNext}
-                        disabled={!isCompleted}
-                    >
+                    <Button className="w-full" onClick={handleNext} disabled={!isCompleted}>
                         Next <ArrowLongRightIcon className="inline h-6 fill-current text-white" />
-                    </button>
+                    </Button>
                 </div>
             </div>
         </>

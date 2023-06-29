@@ -10,24 +10,23 @@ import {
     PromptTemplate,
     SystemMessagePromptTemplate,
 } from "langchain/prompts";
+import { SimpleChatMessage } from "@/app/types";
 
 export async function POST(req: Request) {
     const { input, history, business, promptConfig } = await req.json();
-    console.log("input -" + input + "-");
-    console.log("history", history);
+    // console.log("input -" + input + "-");
+    // console.log("history", history);
     // console.log("business", business);
     // console.log("promptConfig", promptConfig);
 
     try {
         // generate history
-        const pastMessages: any[] = history.map((h: string) => {
-            if (h.trim().length == 0) return;
+        const pastMessages: any[] = history.map((h: SimpleChatMessage) => {
+            if (h.message.trim().length == 0) return;
 
-            const speaker = h.substring(h.indexOf("[") + 1, h.indexOf("]"));
-            const message = h.substring(h.indexOf("]") + 2);
-            if (speaker == "User") return new HumanChatMessage(message);
-            if (speaker == "Assistant") return new AIChatMessage(message);
-            if (speaker == "System") return new SystemChatMessage(message);
+            if (h.speaker == "User") return new HumanChatMessage(h.message);
+            if (h.speaker == "Assistant") return new AIChatMessage(h.message);
+            if (h.speaker == "System") return new SystemChatMessage(h.message);
         });
 
         // chat bot memory

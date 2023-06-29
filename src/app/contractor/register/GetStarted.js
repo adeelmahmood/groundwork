@@ -1,3 +1,4 @@
+import { Button } from "flowbite-react";
 import { useState } from "react";
 
 export default function GetStarted({ business, setBusiness, handle, ...rest }) {
@@ -19,13 +20,9 @@ export default function GetStarted({ business, setBusiness, handle, ...rest }) {
                 </p>
 
                 <div className="mt-4">
-                    <button
-                        className="btn-secondary w-full"
-                        onClick={handle}
-                        disabled={!isCompleted}
-                    >
+                    <Button className="w-full" onClick={handle} disabled={!isCompleted}>
                         Lets Get Started
-                    </button>
+                    </Button>
                 </div>
             </div>
         </>

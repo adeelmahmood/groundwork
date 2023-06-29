@@ -1,3 +1,5 @@
+import { SimpleChatMessage } from "@/app/types";
+
 export class AiReceptionistClient {
     private baseUrl: string = process.env.VERCEL_URL
         ? "https://" + process.env.VERCEL_URL
@@ -9,7 +11,12 @@ export class AiReceptionistClient {
         this.internalCall = _internalCall;
     }
 
-    async reply(input: string, history: string[], business: any, promptConfig: any) {
+    async reply(
+        input: SimpleChatMessage,
+        history: SimpleChatMessage[],
+        business: any,
+        promptConfig: any
+    ) {
         const { business_prompts, business_settings, ...b } = business;
 
         const response = await fetch(
@@ -18,7 +25,7 @@ export class AiReceptionistClient {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    input,
+                    input: input.message,
                     history,
                     business: b,
                     promptConfig,

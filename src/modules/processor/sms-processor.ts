@@ -2,7 +2,6 @@ import { getTwilioSASupabaseClient } from "@/utils/supbase";
 import { BusinessDataService } from "../data/business-service";
 import { SmsDataService } from "../data/sms-service";
 import { inngest } from "@/inngest/client";
-import { TABLE_SMS_MESSAGES } from "@/utils/constants";
 import { AiLeadsHandler } from "../ai/leads-handler";
 
 export class SmsProcessor {

@@ -1,6 +1,7 @@
 import { PromptTemplate } from "langchain/prompts";
-import { LLMChain } from "langchain";
 import { OpenAI } from "langchain/llms/openai";
+import { SimpleChatMessage } from "@/app/types";
+import { LLMChain } from "langchain/chains";
 
 export async function POST(req: Request) {
     const { history, promptConfig } = await req.json();
@@ -15,7 +16,12 @@ export async function POST(req: Request) {
             llm: llm,
         });
 
-        const response = await chain.call({ history });
+        const conversation = history
+            .map((h: SimpleChatMessage) => `[${h.speaker}] ${h.message}`)
+            .join("\n");
+        // console.log(conversation);
+
+        const response = await chain.call({ history: conversation });
         return new Response(JSON.stringify(response), {
             headers: { "Content-Type": "application/json" },
         });

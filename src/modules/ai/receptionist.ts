@@ -3,6 +3,7 @@ import { BusinessDataService } from "../data/business-service";
 import { SmsDataService } from "../data/sms-service";
 import { TwilioClient } from "../clients/twilio-client";
 import { AiReceptionistClient } from "../clients/receptionist-client";
+import { SimpleChatMessage } from "@/app/types";
 
 export class AiReceptionist {
     private client: AiReceptionistClient;
@@ -90,12 +91,17 @@ export class AiReceptionist {
     }
 
     extractInputAndHistory(messages: any) {
+        const chatMessages: SimpleChatMessage[] = messages.map((m: any) => {
+            return {
+                message: m.message,
+                speaker: m.speaker,
+            } as SimpleChatMessage;
+        });
+
         // input is the most recent message
-        const input = messages[messages.length - 1].message.trim();
+        const input = chatMessages[chatMessages.length - 1];
         // everything else becomes history
-        const history = messages
-            .slice(0, messages.length - 1)
-            .map((m: any) => "[" + m.speaker + "] " + m.message.trim());
+        const history = chatMessages.slice(0, chatMessages.length - 1);
         return { input, history };
     }
 }

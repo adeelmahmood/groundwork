@@ -5,13 +5,10 @@ import { useEffect, useRef, useState } from "react";
 import SidebarComponent from "../../sidebar";
 import Countdown, { CountdownApi } from "react-countdown";
 import { BusinessDataService } from "@/modules/data/business-service";
-import { TextInput } from "flowbite-react";
+import { Button, TextInput } from "flowbite-react";
 import { AiReceptionistClient } from "@/modules/clients/receptionist-client";
-
-interface ChatMessage {
-    message: string;
-    speaker: string;
-}
+import { SimpleChatMessage } from "@/app/types";
+import { XMarkIcon } from "@heroicons/react/24/solid";
 
 export default function Interact({ params }: { params: { id: string } }) {
     const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +17,7 @@ export default function Interact({ params }: { params: { id: string } }) {
     const [chatInput, setChatInput] = useState("");
     const [chatRequested, isChatRequested] = useState(false);
 
-    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+    const [chatMessages, setChatMessages] = useState<SimpleChatMessage[]>([]);
     const messagesEndRef = useRef<HTMLInputElement>(null);
 
     const [summary, setSummary] = useState("");
@@ -69,14 +66,45 @@ export default function Interact({ params }: { params: { id: string } }) {
         }
     }
 
-    const addMessage = (message: string, speaker: string) => {
-        setChatMessages((prev) => [...prev, { message: message, speaker: speaker }]);
+    function sleep(ms: number) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+    const talkForMe = async () => {
+        const p = {
+            temperature: 1,
+            prompt: `You are a home owner. Your name is Adam. 
+Think of a home improvement project and then communite your needs to the contractor one statement at a time. 
+Respond only as the home owner. Start the conversation by introducing yourself. Only answer the questions posed by the contractor in the CONVERSATION HISTORY.
+
+CONVERSATION HISTORY:
+[Assistant] Hi, I am a contractor. How can I help you?
+{history}
+
+Format your responses only as your answer without any information about the speaker.
+`,
+        };
+        setIsLoading(true);
+        const response = await fetch(`/api/ai-agent`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                history: chatMessages,
+                promptConfig: p,
+            }),
+        });
+        setIsLoading(false);
+        const data = await response.json();
+        if (data && data.text) {
+            setCountdownState({ date: Date.now() + chatbotDelay * 1000 });
+            addMessage(data.text, "User");
+            isChatRequested(true);
+            await sleep(500);
+            chat();
+        }
     };
 
-    const getMessageAt = (index: number) => {
-        return index < chatMessages.length
-            ? `[${chatMessages[index].speaker}] ${chatMessages[index].message}`
-            : null;
+    const addMessage = (message: string, speaker: string) => {
+        setChatMessages((prev) => [...prev, { message: message.trim(), speaker: speaker }]);
     };
 
     // record a new message from user and start timer
@@ -95,14 +123,9 @@ export default function Interact({ params }: { params: { id: string } }) {
 
         setIsLoading(true);
 
-        let input = getMessageAt(chatMessages.length - 1);
-        input = input?.startsWith("[User] ") ? input.split("[User] ")[1] : "";
-
         const response = await client.reply(
-            input.trim(),
-            chatMessages
-                .slice(0, chatMessages.length - 1)
-                .map((cm) => `[${cm.speaker}] ${cm.message}`),
+            chatMessages[chatMessages.length - 1],
+            chatMessages.slice(0, chatMessages.length - 1),
             business,
             receptionistPromptConfig
         );
@@ -177,12 +200,22 @@ export default function Interact({ params }: { params: { id: string } }) {
                                     {chatMessages?.map((cm, i) => (
                                         <div
                                             key={i}
-                                            className={`mt-2 ${
+                                            className={`mt-2 group ${
                                                 cm.speaker == "User"
                                                     ? "flex items-center justify-end"
                                                     : "flex items-center"
                                             }`}
                                         >
+                                            {cm.speaker == "User" && (
+                                                <XMarkIcon
+                                                    className="hidden group-hover:block h-3 fill-current text-gray-700 mr-1 cursor-pointer"
+                                                    onClick={() => {
+                                                        setChatMessages((prev) =>
+                                                            prev.filter((_, ind) => ind !== i)
+                                                        );
+                                                    }}
+                                                />
+                                            )}
                                             <span
                                                 className={`max-w-sm text-white px-3 py-2 rounded-md ${
                                                     cm.speaker == "User"
@@ -192,6 +225,16 @@ export default function Interact({ params }: { params: { id: string } }) {
                                             >
                                                 {cm.message}
                                             </span>
+                                            {cm.speaker == "Assistant" && (
+                                                <XMarkIcon
+                                                    className="hidden group-hover:block h-3 fill-current text-gray-700 ml-1 cursor-pointer"
+                                                    onClick={() => {
+                                                        setChatMessages((prev) =>
+                                                            prev.filter((_, ind) => ind !== i)
+                                                        );
+                                                    }}
+                                                />
+                                            )}
                                         </div>
                                     ))}
                                     {isLoading && (
@@ -217,17 +260,52 @@ export default function Interact({ params }: { params: { id: string } }) {
                         </div>
                     </div>
                 </div>
-
-                <div className="text-gray-800 dark:text-gray-200">
-                    <Countdown
-                        autoStart={false}
-                        ref={setCountdownRef}
-                        date={countdownState.date}
-                        renderer={({ hours, minutes, seconds }) => (
-                            <>{seconds ? <span>Waiting... {seconds}</span> : ""}</>
-                        )}
-                        onComplete={() => chat()}
-                    />
+                <div className="flex items-center justify-between">
+                    <div className="text-gray-800 dark:text-gray-200">
+                        <Countdown
+                            autoStart={false}
+                            ref={setCountdownRef}
+                            date={countdownState.date}
+                            renderer={({ hours, minutes, seconds }) => (
+                                <>{seconds ? <span>Waiting... {seconds}</span> : ""}</>
+                            )}
+                            onComplete={() => chat()}
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button onClick={async () => talkForMe()} disabled={isLoading}>
+                            Talk
+                        </Button>
+                        <Button
+                            onClick={async () => {
+                                window.localStorage.setItem(
+                                    "chat_history",
+                                    JSON.stringify(chatMessages)
+                                );
+                            }}
+                            disabled={isLoading}
+                        >
+                            Save
+                        </Button>
+                        <Button
+                            onClick={async () => {
+                                const history = window.localStorage.getItem("chat_history");
+                                if (history) setChatMessages(JSON.parse(history));
+                            }}
+                            disabled={isLoading}
+                        >
+                            Load
+                        </Button>
+                        <Button
+                            onClick={async () => {
+                                window.localStorage.removeItem("chat_history");
+                                setChatMessages([]);
+                            }}
+                            disabled={isLoading}
+                        >
+                            Reset
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>

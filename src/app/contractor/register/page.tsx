@@ -49,7 +49,7 @@ export default function Register() {
         business_name: "",
         business_url: "",
         business_description: "",
-        registered_phone: process.env.NEXT_PUBLIC_TWILIO_PHONENUMBER,
+        registered_phone: "",
     });
 
     const prevStage = () => {
@@ -81,7 +81,6 @@ export default function Register() {
             setBusiness({
                 ...business,
                 ...data,
-                registered_phone: process.env.NEXT_PUBLIC_TWILIO_PHONENUMBER,
             });
         }
     }
