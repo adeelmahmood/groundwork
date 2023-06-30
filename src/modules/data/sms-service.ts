@@ -32,8 +32,8 @@ export class SmsDataService {
             .eq("sid", sid);
 
         if (error) {
-            console.log(`error in updating sms message status ${error.message}`);
-            throw new Error(`error in updating sms message status ${error.message}`);
+            console.log(`error in updating sms status ${error.message}`);
+            throw new Error(`error in updating sms status ${error.message}`);
         }
     }
 
