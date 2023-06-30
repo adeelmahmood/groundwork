@@ -14,6 +14,7 @@ export class TwilioClient {
                 body: message,
                 from: from,
                 to: to,
+                statusCallback: process.env.TWILIO_SMS_CALLBACK_URL,
             });
 
             return sent;

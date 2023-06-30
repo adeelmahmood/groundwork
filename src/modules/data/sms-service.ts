@@ -21,6 +21,22 @@ export class SmsDataService {
         }
     }
 
+    async updateStatus(sid: string, status: string, statusInfo: string) {
+        // update status of message
+        const { error } = await this.supabaseClient
+            .from(TABLE_SMS_MESSAGES)
+            .update({
+                status: status,
+                status_info: statusInfo,
+            })
+            .eq("sid", sid);
+
+        if (error) {
+            console.log(`error in updating sms message status ${error.message}`);
+            throw new Error(`error in updating sms message status ${error.message}`);
+        }
+    }
+
     async retrieveLeadMessages(fromPhone: string, toPhone: string, leadId: string) {
         // retrieve messages received and sent
         let query = this.supabaseClient

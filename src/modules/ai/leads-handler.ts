@@ -53,6 +53,7 @@ export class AiLeadsHandler {
             const lead = {
                 ...response,
                 business_id: business.id,
+                customer_phone: fromPhone,
             };
 
             // save this lead
