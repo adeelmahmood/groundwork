@@ -2,6 +2,7 @@ import {
     ArrowLeftCircleIcon,
     ArrowRightCircleIcon,
     BoltIcon,
+    ChatBubbleLeftIcon,
     ClipboardDocumentCheckIcon,
     Cog6ToothIcon,
     HomeIcon,
@@ -64,6 +65,12 @@ export default function SidebarComponent({
                                 icon={ClipboardDocumentCheckIcon}
                             >
                                 <p>Leads</p>
+                            </Sidebar.Item>
+                            <Sidebar.Item
+                                href={`/contractor/dashboard/conversations/${business?.id}`}
+                                icon={ChatBubbleLeftIcon}
+                            >
+                                <p>Conversations</p>
                             </Sidebar.Item>
                             <Sidebar.Item
                                 href={`/contractor/dashboard/interact/${business?.id}`}
