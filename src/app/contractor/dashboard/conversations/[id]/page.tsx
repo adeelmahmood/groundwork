@@ -30,7 +30,10 @@ export default function Conversations({ params }: { params: { id: string } }) {
     }
 
     async function loadConversations(phone: string) {
-        const { data, error } = await supabase.from(VIEW_SMS_MESSAGES_SUMMARY).select();
+        const { data, error } = await supabase
+            .from(VIEW_SMS_MESSAGES_SUMMARY)
+            .select()
+            .eq("to_phone", phone);
         if (error) {
             console.log("error in retrieving messages summary", error);
         } else {
