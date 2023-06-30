@@ -4,4 +4,5 @@ export interface SimpleChatMessage {
     date: string;
     status: string;
     statusInfo: string;
+    messageType: string;
 }

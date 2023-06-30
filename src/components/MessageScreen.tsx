@@ -21,6 +21,27 @@ export default function MessageScreen({
 
     const [chatInput, setChatInput] = useState("");
 
+    const MediaMessageComp = ({ message }: { message: SimpleChatMessage }) => {
+        return (
+            <div className="max-w-sm flex items-center gap-2">
+                {message.message.split("\n").map((m: string, i) => {
+                    let url = m.substring(m.indexOf(":") + 1);
+                    url = url.endsWith("]") ? url.substring(0, url.length - 1) : url;
+                    return (
+                        <div key={i}>
+                            <a href={url} target="_blank">
+                                <img
+                                    className="rounded-md h-32 w-32 object-cover object-center"
+                                    src={url}
+                                />
+                            </a>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
     useEffect(() => {
         if (interactiveMode && (isLoading || chatMessages.length) && messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({
@@ -64,12 +85,18 @@ export default function MessageScreen({
                                             )}
                                             <span
                                                 className={`max-w-sm text-white px-3 py-2 rounded-md ${
-                                                    cm.speaker == "User"
+                                                    cm.speaker == "User" && cm.messageType == "text"
                                                         ? "bg-blue-600 dark:bg-blue-500 mr-2"
-                                                        : "bg-gray-600 dark:bg-gray-500 ml-2"
+                                                        : cm.speaker == "Assistant"
+                                                        ? "bg-gray-600 dark:bg-gray-500 ml-2"
+                                                        : "mr-2"
                                                 }`}
                                             >
-                                                {cm.message}
+                                                {cm.messageType == "image" ? (
+                                                    <MediaMessageComp message={cm} />
+                                                ) : (
+                                                    <p className=" max-w-sm">{cm.message}</p>
+                                                )}
                                             </span>
                                             {cm.speaker == "Assistant" && interactiveMode && (
                                                 <XMarkIcon
@@ -84,7 +111,7 @@ export default function MessageScreen({
                                         </div>
                                         <div
                                             key={i}
-                                            className={`mt-2 group ${
+                                            className={`mt-1 group text-gray-600 dark:text-gray-600 ${
                                                 cm.speaker == "User"
                                                     ? "flex items-center justify-end"
                                                     : "flex items-center"

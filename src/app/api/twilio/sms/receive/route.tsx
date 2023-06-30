@@ -3,6 +3,7 @@ import MessagingResponse from "twilio/lib/twiml/MessagingResponse";
 
 export async function POST(req: Request) {
     const data = await req.formData();
+    // console.log(data);
 
     const twilioSignature = req.headers.get("x-twilio-signature");
     const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN!;
@@ -35,7 +36,13 @@ export async function POST(req: Request) {
         if (command) {
             resp = (await smsProcessor.processCommand(command, data)) || "";
         } else {
-            await smsProcessor.processIncomingSms(data);
+            // check message type
+            const isMediaMsg = data.get("MessageSid")?.toString().startsWith("MM");
+            if (isMediaMsg) {
+                resp = (await smsProcessor.processIncomingMms(data)) || "";
+            } else {
+                await smsProcessor.processIncomingSms(data);
+            }
         }
 
         // respond to twilio

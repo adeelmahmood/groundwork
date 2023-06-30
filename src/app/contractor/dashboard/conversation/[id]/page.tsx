@@ -56,7 +56,8 @@ export default function Conversation({ params }: { params: { id: string } }) {
                     speaker: m.speaker,
                     date: m.created_at,
                     status: m.status,
-                    statusInfo: "",
+                    statusInfo: m.status_info,
+                    messageType: m.message_type,
                 } as SimpleChatMessage;
             })
         );

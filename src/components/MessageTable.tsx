@@ -2,6 +2,27 @@ import { SimpleChatMessage } from "@/app/types";
 import { displayDate } from "@/utils/utils";
 
 export default function MessageTable({ chatMessages }: { chatMessages: SimpleChatMessage[] }) {
+    const MediaMessageComp = ({ message }: { message: SimpleChatMessage }) => {
+        return (
+            <div className="max-w-sm flex items-center">
+                {message.message.split("\n").map((m: string, i) => {
+                    let url = m.substring(m.indexOf(":") + 1);
+                    url = url.endsWith("]") ? url.substring(0, url.length - 1) : url;
+                    return (
+                        <div key={i} className="mr-2">
+                            <a href={url} target="_blank">
+                                <img
+                                    className="rounded-md h-32 w-32 object-cover object-center"
+                                    src={url}
+                                />
+                            </a>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
     return (
         <>
             {chatMessages && (
@@ -31,7 +52,11 @@ export default function MessageTable({ chatMessages }: { chatMessages: SimpleCha
                                 >
                                     <td className="py-4 px-6 dark:text-gray-200">{cm.speaker}</td>
                                     <td className="py-4 px-6 dark:text-gray-200">
-                                        <p className=" max-w-sm">{cm.message}</p>
+                                        {cm.messageType == "image" ? (
+                                            <MediaMessageComp message={cm} />
+                                        ) : (
+                                            <p className=" max-w-sm">{cm.message}</p>
+                                        )}
                                     </td>
                                     <td className="py-4 px-6 dark:text-gray-200">
                                         {displayDate(cm.date)}

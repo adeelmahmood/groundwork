@@ -7,7 +7,49 @@ import { AiLeadsHandler } from "../ai/leads-handler";
 export class SmsProcessor {
     constructor() {}
 
+    SUPPORTED_MEDIA_TYPES = ["image/jpeg", "image/jpg", "image/png"];
+
+    async processIncomingMms(smsData: Record<string, any>) {
+        const mediaUrls = [];
+        const numMedia = smsData.get("NumMedia");
+
+        for (let i = 0; i < numMedia; i++) {
+            // check if content type is supported
+            const contentType = smsData.get(`MediaContentType${i}`);
+            if (this.SUPPORTED_MEDIA_TYPES.includes(contentType)) {
+                // get media url
+                const mediaUrl = smsData.get(`MediaUrl${i}`);
+                mediaUrls.push(`[Picture-${i + 1}:${mediaUrl}]`);
+            } else {
+                return `content type ${contentType} not supported`;
+            }
+        }
+
+        const fromPhone = smsData.get("From");
+        const toPhone = smsData.get("To");
+        const sid = smsData.get("MessageSid");
+        const message = mediaUrls.join("\n");
+
+        // process as text message
+        await this.processMessage(fromPhone, toPhone, message, sid, "image");
+    }
+
     async processIncomingSms(smsData: Record<string, any>) {
+        const fromPhone = smsData.get("From");
+        const toPhone = smsData.get("To");
+        const message = smsData.get("Body");
+        const sid = smsData.get("MessageSid");
+
+        await this.processMessage(fromPhone, toPhone, message, sid);
+    }
+
+    async processMessage(
+        fromPhone: string,
+        toPhone: string,
+        message: string,
+        sid: string,
+        messageType: string = "text"
+    ) {
         // twilio db service account
         const supabaseClient = await getTwilioSASupabaseClient();
 
@@ -17,11 +59,6 @@ export class SmsProcessor {
         const smsService = new SmsDataService(supabaseClient);
 
         try {
-            const fromPhone = smsData.get("From");
-            const toPhone = smsData.get("To");
-            const message = smsData.get("Body");
-            const sid = smsData.get("SmsSid");
-
             // retrieve sms response delay setting
             const responseDelay = await businessService.retrieveBusinessSetting(
                 {
@@ -39,6 +76,7 @@ export class SmsProcessor {
                 sid,
                 speaker: "User",
                 status: "Received",
+                message_type: messageType,
             });
 
             // finally, emit event to process this sms
@@ -62,7 +100,6 @@ export class SmsProcessor {
     }
 
     async processCommand(command: string, smsData: Record<string, any>) {
-        console.log("Received command: ", command);
         // twilio db service account
         const supabaseClient = await getTwilioSASupabaseClient();
 

@@ -107,6 +107,7 @@ Format your responses only as your answer without any information about the spea
                 date: new Date() + "",
                 status: speaker == "User" ? "Received" : "Sent",
                 statusInfo: "",
+                messageType: "text",
             },
         ]);
     };
