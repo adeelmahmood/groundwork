@@ -61,7 +61,7 @@ export default function Leads({ params }: { params: { id: string } }) {
                 {leads && (
                     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-8 lg:gap-x-8">
                         {leads.map((lead: any, i: number) => (
-                            <LeadCard key={i} lead={lead} />
+                            <LeadCard key={i} lead={lead} showViewConversation={true} />
                         ))}
                     </div>
                 )}

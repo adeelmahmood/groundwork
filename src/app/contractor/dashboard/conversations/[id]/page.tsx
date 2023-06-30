@@ -1,16 +1,13 @@
 "use client";
 
 import { BusinessDataService } from "@/modules/data/business-service";
-import { SmsDataService } from "@/modules/data/sms-service";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
 import SidebarComponent from "../../sidebar";
-import { Button, Modal } from "flowbite-react";
+import { Button } from "flowbite-react";
 import ReactTimeAgo from "react-time-ago";
 import { formatPhoneNumber } from "@/utils/utils";
-import { TABLE_SMS_MESSAGES, VIEW_SMS_MESSAGES_SUMMARY } from "@/utils/constants";
-import MessageScreen from "@/components/MessageScreen";
-import { SimpleChatMessage } from "@/app/types";
+import { VIEW_SMS_MESSAGES_SUMMARY } from "@/utils/constants";
 
 export default function Conversations({ params }: { params: { id: string } }) {
     const [isLoading, setIsLoading] = useState(false);
@@ -20,16 +17,10 @@ export default function Conversations({ params }: { params: { id: string } }) {
     const [business, setBusiness] = useState<any>();
 
     const [conversations, setConversations] = useState<any>();
-    const [selectedConversation, setSelectedConversation] = useState<any>();
-    const [chatMessages, setChatMessages] = useState<SimpleChatMessage[]>([]);
-
-    const [openModal, setOpenModal] = useState<string | undefined>();
-    const props = { openModal, setOpenModal };
 
     const supabase = createClientComponentClient();
 
     const service = new BusinessDataService(supabase);
-    const smsService = new SmsDataService(supabase);
 
     async function loadBusinesses(id: string) {
         const data = await service.retrieveAllBusinesses();
@@ -45,24 +36,6 @@ export default function Conversations({ params }: { params: { id: string } }) {
         } else {
             setConversations(data);
         }
-    }
-
-    async function showConversation(record: any) {
-        setSelectedConversation(record);
-        // retrieve all messages for this conversation
-        const messages = await smsService.retrieveMessages(
-            business.registered_phone,
-            record.from_phone
-        );
-
-        setChatMessages(
-            messages.map((m: any) => {
-                return { message: m.message, speaker: m.speaker } as SimpleChatMessage;
-            })
-        );
-
-        // open conversation modal
-        props.setOpenModal("dismissible");
     }
 
     useEffect(() => {
@@ -81,29 +54,8 @@ export default function Conversations({ params }: { params: { id: string } }) {
         <div className="flex">
             <SidebarComponent businesses={businesses} business={business} />
 
-            <Modal
-                dismissible
-                show={props.openModal === "dismissible"}
-                onClose={() => props.setOpenModal(undefined)}
-            >
-                <Modal.Header>
-                    Conversation w/ {formatPhoneNumber(selectedConversation?.from_phone)}
-                </Modal.Header>
-                <Modal.Body>
-                    <div className="">
-                        <MessageScreen
-                            chatMessages={chatMessages}
-                            setChatMessages={setChatMessages}
-                            isLoading={false}
-                            message={(input: string) => {}}
-                            interactiveMode={false}
-                        />
-                    </div>
-                </Modal.Body>
-            </Modal>
-
             <div className="container mx-auto p-6 border rounded-md shadow-md">
-                <h2 className="max-w-6xl text-3xl lg:text-5xl font-bold tracking-wide text-white mt-2 lg:mt-8">
+                <h2 className="max-w-6xl text-2xl lg:text-4xl font-bold tracking-wide text-white mt-2 lg:mt-8">
                     <span className="bg-gradient-to-r from-indigo-500 to-green-600 bg-clip-text text-transparent">
                         Conversations
                     </span>
@@ -135,7 +87,11 @@ export default function Conversations({ params }: { params: { id: string } }) {
                                             </div>
                                         </div>
                                     </div>
-                                    <Button onClick={() => showConversation(record)}>
+                                    <Button
+                                        href={`/contractor/dashboard/conversation/${
+                                            business.id
+                                        }?phone=${encodeURIComponent(record.from_phone)}`}
+                                    >
                                         View Conversation
                                     </Button>
                                 </div>

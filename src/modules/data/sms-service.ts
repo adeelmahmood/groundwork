@@ -21,6 +21,24 @@ export class SmsDataService {
         }
     }
 
+    async retrieveLeadMessages(fromPhone: string, toPhone: string, leadId: string) {
+        // retrieve messages received and sent
+        let query = this.supabaseClient
+            .from(TABLE_SMS_MESSAGES)
+            .select()
+            .in("from_phone", [fromPhone, toPhone])
+            .in("to_phone", [fromPhone, toPhone])
+            .eq("lead_id", leadId);
+        const { data: messages, error } = await query.order("created_at");
+
+        if (error) {
+            console.log(`error in retrieving lead messages ${error.message}`);
+            throw new Error(`error in retrieving lead messages ${error.message}`);
+        }
+
+        return messages;
+    }
+
     async retrieveMessages(fromPhone: string, toPhone: string, openOnly = true) {
         // retrieve messages received and sent
         let query = this.supabaseClient

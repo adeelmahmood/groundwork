@@ -1,8 +1,15 @@
 "use client";
 
+import { formatPhoneNumber } from "@/utils/utils";
 import { Button, Card } from "flowbite-react";
 
-export default function LeadCard({ lead }: { lead: any }) {
+export default function LeadCard({
+    lead,
+    showViewConversation = true,
+}: {
+    lead: any;
+    showViewConversation: boolean;
+}) {
     return (
         <>
             <Card className="max-w-sm">
@@ -12,6 +19,7 @@ export default function LeadCard({ lead }: { lead: any }) {
                 <div className="mt-2 font-normal text-gray-700 dark:text-gray-400">
                     <p className="font-semibold">{lead.customer_name}</p>
                     <p>{lead.customer_email}</p>
+                    <p>{formatPhoneNumber(lead.customer_phone)}</p>
 
                     <p className="mt-4 font-semibold">Timing</p>
                     <p>{lead.timing}</p>
@@ -23,9 +31,19 @@ export default function LeadCard({ lead }: { lead: any }) {
                     <p>{lead.customer_availability}</p>
                 </div>
 
-                <div className="mt-2">
-                    <Button>View Conversation</Button>
-                </div>
+                {showViewConversation && (
+                    <div className="mt-2">
+                        <Button
+                            href={`/contractor/dashboard/conversation/${
+                                lead.business_id
+                            }?phone=${encodeURIComponent(
+                                lead.customer_phone
+                            )}&lead=${encodeURIComponent(lead.id)}`}
+                        >
+                            View Conversation
+                        </Button>
+                    </div>
+                )}
             </Card>
         </>
     );

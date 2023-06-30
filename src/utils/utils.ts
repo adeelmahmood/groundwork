@@ -60,3 +60,23 @@ export function relativeTimeFromElapsed(elapsed: number): string {
     }
     return "";
 }
+
+export const displayDate = (date: string) => {
+    return (date ? new Date(date) : new Date()).toLocaleDateString("en-us", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+    });
+};
+
+export const displayDateShort = (date: string) => {
+    return (date ? new Date(date) : new Date()).toLocaleDateString("en-us", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+    });
+};

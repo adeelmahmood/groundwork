@@ -99,7 +99,16 @@ Format your responses only as your answer without any information about the spea
     };
 
     const addMessage = (message: string, speaker: string) => {
-        setChatMessages((prev) => [...prev, { message: message.trim(), speaker: speaker }]);
+        setChatMessages((prev) => [
+            ...prev,
+            {
+                message: message.trim(),
+                speaker: speaker,
+                date: new Date() + "",
+                status: speaker == "User" ? "Received" : "Sent",
+                statusInfo: "",
+            },
+        ]);
     };
 
     // record a new message from user and start timer
@@ -181,7 +190,7 @@ Format your responses only as your answer without any information about the spea
                     setChatMessages={setChatMessages}
                     isLoading={isLoading}
                     message={message}
-                    interactiveMode={true}
+                    interactiveMode={!autoChat}
                 />
 
                 <div className="flex items-center justify-between">

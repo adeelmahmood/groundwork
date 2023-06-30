@@ -1,4 +1,5 @@
 import { SimpleChatMessage } from "@/app/types";
+import { displayDate, displayDateShort } from "@/utils/utils";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import { TextInput } from "flowbite-react";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
@@ -21,14 +22,14 @@ export default function MessageScreen({
     const [chatInput, setChatInput] = useState("");
 
     useEffect(() => {
-        if ((isLoading || chatMessages.length) && messagesEndRef.current) {
+        if (interactiveMode && (isLoading || chatMessages.length) && messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({
                 behavior: "smooth",
                 block: "nearest",
                 inline: "start",
             });
         }
-    }, [chatMessages, isLoading]);
+    }, [chatMessages, isLoading, interactiveMode, messagesEndRef]);
 
     return (
         <>
@@ -42,44 +43,58 @@ export default function MessageScreen({
                         <div className="border-2 bg-gray-50 dark:bg-gray-100 rounded-lg mx-3 mt-4 mb-1 flex-1 text-sm overflow-y-auto">
                             <div className="pb-2">
                                 {chatMessages?.map((cm, i) => (
-                                    <div
-                                        key={i}
-                                        className={`mt-2 group ${
-                                            cm.speaker == "User"
-                                                ? "flex items-center justify-end"
-                                                : "flex items-center"
-                                        }`}
-                                    >
-                                        {cm.speaker == "User" && interactiveMode && (
-                                            <XMarkIcon
-                                                className="hidden group-hover:block h-3 fill-current text-gray-700 mr-1 cursor-pointer"
-                                                onClick={() => {
-                                                    setChatMessages((prev) =>
-                                                        prev.filter((_, ind) => ind !== i)
-                                                    );
-                                                }}
-                                            />
-                                        )}
-                                        <span
-                                            className={`max-w-sm text-white px-3 py-2 rounded-md ${
+                                    <>
+                                        <div
+                                            key={i}
+                                            className={`mt-2 group ${
                                                 cm.speaker == "User"
-                                                    ? "bg-blue-600 dark:bg-blue-500 mr-2"
-                                                    : "bg-gray-600 dark:bg-gray-500 ml-2"
+                                                    ? "flex items-center justify-end"
+                                                    : "flex items-center"
                                             }`}
                                         >
-                                            {cm.message}
-                                        </span>
-                                        {cm.speaker == "Assistant" && interactiveMode && (
-                                            <XMarkIcon
-                                                className="hidden group-hover:block h-3 fill-current text-gray-700 ml-1 cursor-pointer"
-                                                onClick={() => {
-                                                    setChatMessages((prev) =>
-                                                        prev.filter((_, ind) => ind !== i)
-                                                    );
-                                                }}
-                                            />
-                                        )}
-                                    </div>
+                                            {cm.speaker == "User" && interactiveMode && (
+                                                <XMarkIcon
+                                                    className="hidden group-hover:block h-3 fill-current text-gray-700 mr-1 cursor-pointer"
+                                                    onClick={() => {
+                                                        setChatMessages((prev) =>
+                                                            prev.filter((_, ind) => ind !== i)
+                                                        );
+                                                    }}
+                                                />
+                                            )}
+                                            <span
+                                                className={`max-w-sm text-white px-3 py-2 rounded-md ${
+                                                    cm.speaker == "User"
+                                                        ? "bg-blue-600 dark:bg-blue-500 mr-2"
+                                                        : "bg-gray-600 dark:bg-gray-500 ml-2"
+                                                }`}
+                                            >
+                                                {cm.message}
+                                            </span>
+                                            {cm.speaker == "Assistant" && interactiveMode && (
+                                                <XMarkIcon
+                                                    className="hidden group-hover:block h-3 fill-current text-gray-700 ml-1 cursor-pointer"
+                                                    onClick={() => {
+                                                        setChatMessages((prev) =>
+                                                            prev.filter((_, ind) => ind !== i)
+                                                        );
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
+                                        <div
+                                            key={i}
+                                            className={`mt-2 group ${
+                                                cm.speaker == "User"
+                                                    ? "flex items-center justify-end"
+                                                    : "flex items-center"
+                                            }`}
+                                        >
+                                            <span className="text-xs px-4">
+                                                {displayDateShort(cm.date)} ({cm.status})
+                                            </span>
+                                        </div>
+                                    </>
                                 ))}
                                 {isLoading && (
                                     <div className="animate-pulse text-4xl ml-2 dark:text-gray-900">
