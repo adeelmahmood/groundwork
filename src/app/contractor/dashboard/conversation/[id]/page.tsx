@@ -156,7 +156,6 @@ export default function Conversation({ params }: { params: { id: string } }) {
                                         </span>
                                     </h2>
                                     <LeadCard lead={lead} showViewConversation={false} />
-                                    <Button onClick={() => regenLead()}>Regen Lead</Button>
                                 </div>
                             )}
                         </div>
