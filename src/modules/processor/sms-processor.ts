@@ -19,7 +19,7 @@ export class SmsProcessor {
             if (this.SUPPORTED_MEDIA_TYPES.includes(contentType)) {
                 // get media url
                 const mediaUrl = smsData.get(`MediaUrl${i}`);
-                mediaUrls.push(`[Picture-${i + 1}:${mediaUrl}]`);
+                mediaUrls.push(`![](${mediaUrl})`);
             } else {
                 return `content type ${contentType} not supported`;
             }
@@ -107,6 +107,8 @@ export class SmsProcessor {
         const smsService = new SmsDataService(supabaseClient);
         // ai leads handler
         const leadsHandler = new AiLeadsHandler();
+        // business data service
+        const businessService = new BusinessDataService(supabaseClient);
 
         try {
             const fromPhone = smsData.get("From");
@@ -114,9 +116,19 @@ export class SmsProcessor {
             let response;
 
             switch (command) {
-                // remove all messages for this conversation
+                // remove all messages and leads for this conversation
                 case "reset":
-                    await smsService.deleteMessages(fromPhone, toPhone, false);
+                    const business = await businessService.retrieveBusiness([
+                        {
+                            key: "registered_phone",
+                            value: toPhone,
+                        },
+                    ]);
+                    await smsService.deleteAllMessages(
+                        business.id,
+                        business.registered_phone,
+                        fromPhone
+                    );
                     response = "[All previous messages deleted from and to this number]";
                     break;
                 // remove all messages for this conversation

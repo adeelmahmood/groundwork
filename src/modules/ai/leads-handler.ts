@@ -3,6 +3,7 @@ import { AiLeadsClient } from "../clients/leads-client";
 import { SmsDataService } from "../data/sms-service";
 import { BusinessDataService } from "../data/business-service";
 import { LeadsDataService } from "../data/leads-service";
+import { SimpleChatMessage } from "@/app/types";
 
 export class AiLeadsHandler {
     private client: AiLeadsClient;
@@ -44,9 +45,12 @@ export class AiLeadsHandler {
             );
 
             // conversation
-            const conversation = messages.map(
-                (m: any) => "[" + m.speaker + "] " + m.message.trim()
-            );
+            const conversation: SimpleChatMessage[] = messages.map((m: any) => {
+                return {
+                    message: m.message,
+                    speaker: m.speaker,
+                } as SimpleChatMessage;
+            });
 
             // call the ai agent
             const response = await this.client.generate(conversation, promptConfig);

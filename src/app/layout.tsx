@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
     title: "Ground Work",
-    description: "Ground Work - Connecting Contractors with Homeowners",
+    description: "Ground Work - AI Receptionist for Contractors",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

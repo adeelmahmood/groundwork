@@ -1,5 +1,5 @@
 import { SimpleChatMessage } from "@/app/types";
-import { displayDate, displayDateShort } from "@/utils/utils";
+import { displayDateShort } from "@/utils/utils";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import { TextInput } from "flowbite-react";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
@@ -25,8 +25,8 @@ export default function MessageScreen({
         return (
             <div className="max-w-sm flex items-center gap-2">
                 {message.message.split("\n").map((m: string, i) => {
-                    let url = m.substring(m.indexOf(":") + 1);
-                    url = url.endsWith("]") ? url.substring(0, url.length - 1) : url;
+                    let url = m.substring(m.indexOf("(") + 1);
+                    url = url.endsWith(")") ? url.substring(0, url.length - 1) : url;
                     return (
                         <div key={i}>
                             <a href={url} target="_blank">
@@ -64,9 +64,8 @@ export default function MessageScreen({
                         <div className="border-2 bg-gray-50 dark:bg-gray-100 rounded-lg mx-3 mt-4 mb-1 flex-1 text-sm overflow-y-auto">
                             <div className="pb-2">
                                 {chatMessages?.map((cm, i) => (
-                                    <>
+                                    <div key={i}>
                                         <div
-                                            key={i}
                                             className={`mt-2 group ${
                                                 cm.speaker == "User"
                                                     ? "flex items-center justify-end"
@@ -110,7 +109,6 @@ export default function MessageScreen({
                                             )}
                                         </div>
                                         <div
-                                            key={i}
                                             className={`mt-1 group text-gray-600 dark:text-gray-600 ${
                                                 cm.speaker == "User"
                                                     ? "flex items-center justify-end"
@@ -121,7 +119,7 @@ export default function MessageScreen({
                                                 {displayDateShort(cm.date)} ({cm.status})
                                             </span>
                                         </div>
-                                    </>
+                                    </div>
                                 ))}
                                 {isLoading && (
                                     <div className="animate-pulse text-4xl ml-2 dark:text-gray-900">

@@ -9,7 +9,21 @@ export class LeadsDataService {
     }
 
     async insertLead(lead: any, messages: Record<string, any>[]) {
-        // insert new lead in the database
+        const { data: existing, error: existingErr } = await this.supabaseClient
+            .from(TABLE_LEADS)
+            .select("id")
+            .eq("business_id", lead.business_id)
+            .eq("customer_phone", lead.customer_phone)
+            .single();
+
+        if (existing && !existingErr) {
+            console.log(
+                "found existing lead to update but not doing anything with it for now",
+                existing
+            );
+        }
+
+        // insert new lead or update existing one in the database
         const { data, error } = await this.supabaseClient
             .from(TABLE_LEADS)
             .insert(lead)
@@ -17,8 +31,8 @@ export class LeadsDataService {
             .single();
 
         if (error) {
-            console.log(`error in inserting lead ${error.message}`);
-            throw new Error(`error in inserting lead ${error.message}`);
+            console.log(`error in inserting/updating lead ${error.message}`);
+            throw new Error(`error in inserting/updating lead ${error.message}`);
         }
 
         const updates = messages.map((m) => ({

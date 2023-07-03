@@ -1,7 +1,8 @@
 "use client";
 
 import { formatPhoneNumber } from "@/utils/utils";
-import { Button, Card } from "flowbite-react";
+import { Button, Card, Carousel } from "flowbite-react";
+import Link from "next/link";
 
 export default function LeadCard({
     lead,
@@ -31,16 +32,30 @@ export default function LeadCard({
                     <p>{lead.customer_availability}</p>
                 </div>
 
+                {lead.images?.length > 0 && (
+                    <div className="h-44">
+                        <Carousel slide={false}>
+                            {lead.images.map((image: string, i: number) => {
+                                let url = image.substring(image.indexOf("(") + 1);
+                                url = url.substring(0, url.length - 1);
+                                return <img key={i} alt="..." src={url} />;
+                            })}
+                        </Carousel>
+                    </div>
+                )}
+
                 {showViewConversation && (
                     <div className="mt-2">
-                        <Button
-                            href={`/contractor/dashboard/conversation/${
-                                lead.business_id
-                            }?phone=${encodeURIComponent(
-                                lead.customer_phone
-                            )}&lead=${encodeURIComponent(lead.id)}`}
-                        >
-                            View Conversation
+                        <Button className="w-full">
+                            <Link
+                                href={`/contractor/dashboard/conversation/${
+                                    lead.business_id
+                                }?phone=${encodeURIComponent(
+                                    lead.customer_phone
+                                )}&lead=${encodeURIComponent(lead.id)}`}
+                            >
+                                View Conversation
+                            </Link>
                         </Button>
                     </div>
                 )}

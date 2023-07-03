@@ -11,7 +11,7 @@ export class BusinessDataService {
     async retrieveAllBusinesses() {
         const { data: businesses, error } = await this.supabaseClient
             .from(TABLE_REG_BUSINESSES)
-            .select(`*, business_prompts (*), business_settings (*)`)
+            .select(`id, business_name`)
             .order("created_at", { ascending: false });
         if (error) {
             console.log(`error in retrieving all businesses: ${error}`);

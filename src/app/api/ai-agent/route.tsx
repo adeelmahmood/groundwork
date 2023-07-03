@@ -19,7 +19,7 @@ export async function POST(req: Request) {
         const conversation = history
             .map((h: SimpleChatMessage) => `[${h.speaker}] ${h.message}`)
             .join("\n");
-        // console.log(conversation);
+        console.log(conversation);
 
         const response = await chain.call({ history: conversation });
         return new Response(JSON.stringify(response), {

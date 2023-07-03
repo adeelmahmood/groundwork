@@ -1,10 +1,10 @@
 import { PromptTemplate } from "langchain/prompts";
-import { LLMChain } from "langchain";
 import { OpenAI } from "langchain/llms/openai";
 import { StructuredOutputParser } from "langchain/output_parsers";
+import { SimpleChatMessage } from "@/app/types";
 
 export async function POST(req: Request) {
-    const { conversation, promptConfig } = await req.json();
+    const { history, promptConfig } = await req.json();
     // console.log({ conversation, promptConfig });
 
     try {
@@ -19,12 +19,17 @@ export async function POST(req: Request) {
 
         const formatInstructions = parser.getFormatInstructions();
 
+        const conversation = history
+            .map((h: SimpleChatMessage) => `[${h.speaker}] ${h.message}`)
+            .join("\n");
+        console.log(conversation);
+
         const prompt = new PromptTemplate({
             template: promptConfig.prompt,
             inputVariables: ["conversation"],
             partialVariables: { format_instructions: formatInstructions },
         });
-        const input = await prompt.format({ conversation: conversation.join("\n") });
+        const input = await prompt.format({ conversation });
         // console.log(input);
 
         const llm = new OpenAI({ temperature: promptConfig.temperature });

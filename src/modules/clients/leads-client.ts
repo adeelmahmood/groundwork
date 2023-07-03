@@ -1,3 +1,5 @@
+import { SimpleChatMessage } from "@/app/types";
+
 export class AiLeadsClient {
     private baseUrl: string = process.env.VERCEL_URL
         ? "https://" + process.env.VERCEL_URL
@@ -9,12 +11,12 @@ export class AiLeadsClient {
         this.internalCall = _internalCall;
     }
 
-    async generate(conversation: string[], promptConfig: any) {
+    async generate(history: SimpleChatMessage[], promptConfig: any) {
         const response = await fetch(`${!this.internalCall ? this.baseUrl : ""}/api/ai-leads-gen`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                conversation,
+                history,
                 promptConfig,
             }),
         });

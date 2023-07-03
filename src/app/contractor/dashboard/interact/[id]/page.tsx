@@ -1,14 +1,14 @@
 "use client";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useEffect, useRef, useState } from "react";
-import SidebarComponent from "../../sidebar";
+import { useContext, useEffect, useRef, useState } from "react";
 import Countdown, { CountdownApi } from "react-countdown";
 import { BusinessDataService } from "@/modules/data/business-service";
 import { Button } from "flowbite-react";
 import { AiReceptionistClient } from "@/modules/clients/receptionist-client";
 import { SimpleChatMessage } from "@/app/types";
 import MessageScreen from "@/components/MessageScreen";
+import { ContractorDashboardContext } from "../../layout";
 
 export default function Interact({ params }: { params: { id: string } }) {
     const [isLoading, setIsLoading] = useState(false);
@@ -23,8 +23,7 @@ export default function Interact({ params }: { params: { id: string } }) {
 
     const [summary, setSummary] = useState("");
 
-    const [businesses, setBusinesses] = useState<any>(null);
-    const [business, setBusiness] = useState<any>(null);
+    const [business, setBusiness] = useContext(ContractorDashboardContext);
 
     const [receptionistPromptConfig, setReceptionistPromptConfig] = useState<any>();
     const [summarizerPromptConfig, setSummarizerPromptConfig] = useState<any>();
@@ -44,10 +43,8 @@ export default function Interact({ params }: { params: { id: string } }) {
         }
     };
 
-    async function loadBusinesses(id: string) {
-        const data = await service.retrieveAllBusinesses();
-        setBusinesses(data);
-        const bdata = data?.find((b: any) => b.id == id);
+    async function loadBusiness(id: string) {
+        const bdata = await service.retrieveBusinessById(id);
         setBusiness(bdata);
 
         // set prompts
@@ -170,87 +167,85 @@ Format your responses only as your answer without any information about the spea
     }, [countdownApi, countdownState]);
 
     useEffect(() => {
-        loadBusinesses(params.id);
+        if (params.id) {
+            loadBusiness(params.id);
+        }
     }, [supabase, params]);
 
     if (!business) return;
 
     return (
-        <div className="flex">
-            <SidebarComponent businesses={businesses} business={business} />
+        <div className="container mx-auto p-6 border rounded-md shadow-md">
+            <h2 className="max-w-6xl text-3xl lg:text-5xl font-bold tracking-wide text-white mt-2 mb-6">
+                <span className="bg-gradient-to-r from-indigo-500 to-green-600 bg-clip-text text-transparent">
+                    AI Receptionist
+                </span>
+            </h2>
 
-            <div className="container mx-auto p-6 border rounded-md shadow-md">
-                <h2 className="max-w-6xl text-3xl lg:text-5xl font-bold tracking-wide text-white mt-2 mb-6">
-                    <span className="bg-gradient-to-r from-indigo-500 to-green-600 bg-clip-text text-transparent">
-                        AI Receptionist
-                    </span>
-                </h2>
+            <MessageScreen
+                chatMessages={chatMessages}
+                setChatMessages={setChatMessages}
+                isLoading={isLoading}
+                message={message}
+                interactiveMode={!autoChat}
+            />
 
-                <MessageScreen
-                    chatMessages={chatMessages}
-                    setChatMessages={setChatMessages}
-                    isLoading={isLoading}
-                    message={message}
-                    interactiveMode={!autoChat}
-                />
-
-                <div className="flex items-center justify-between">
-                    <div className="text-gray-800 dark:text-gray-200">
-                        <Countdown
-                            autoStart={false}
-                            ref={setCountdownRef}
-                            date={countdownState.date}
-                            renderer={({ hours, minutes, seconds }) => (
-                                <>{seconds ? <span>Waiting... {seconds}</span> : ""}</>
-                            )}
-                            onComplete={() => chat()}
-                        />
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Button
-                            onClick={async () => {
-                                setAutoCount(0);
-                                if (!autoChat) {
-                                    setAutoChat(!autoChat);
-                                    await sleep(1000);
-                                    talkForMe();
-                                } else {
-                                    setAutoChat(!autoChat);
-                                }
-                            }}
-                        >
-                            {autoChat ? "Stop Auto Talk" : "Auto Talk"}
-                        </Button>
-                        <Button
-                            onClick={async () => {
-                                window.localStorage.setItem(
-                                    "chat_history",
-                                    JSON.stringify(chatMessages)
-                                );
-                            }}
-                            disabled={isLoading}
-                        >
-                            Save
-                        </Button>
-                        <Button
-                            onClick={async () => {
-                                const history = window.localStorage.getItem("chat_history");
-                                if (history) setChatMessages(JSON.parse(history));
-                            }}
-                            disabled={isLoading}
-                        >
-                            Load
-                        </Button>
-                        <Button
-                            onClick={async () => {
-                                window.localStorage.removeItem("chat_history");
-                                setChatMessages([]);
-                            }}
-                            disabled={isLoading}
-                        >
-                            Reset
-                        </Button>
-                    </div>
+            <div className="flex items-center justify-between">
+                <div className="text-gray-800 dark:text-gray-200">
+                    <Countdown
+                        autoStart={false}
+                        ref={setCountdownRef}
+                        date={countdownState.date}
+                        renderer={({ hours, minutes, seconds }) => (
+                            <>{seconds ? <span>Waiting... {seconds}</span> : ""}</>
+                        )}
+                        onComplete={() => chat()}
+                    />
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button
+                        onClick={async () => {
+                            setAutoCount(0);
+                            if (!autoChat) {
+                                setAutoChat(!autoChat);
+                                await sleep(1000);
+                                talkForMe();
+                            } else {
+                                setAutoChat(!autoChat);
+                            }
+                        }}
+                    >
+                        {autoChat ? "Stop Auto Talk" : "Auto Talk"}
+                    </Button>
+                    <Button
+                        onClick={async () => {
+                            window.localStorage.setItem(
+                                "chat_history",
+                                JSON.stringify(chatMessages)
+                            );
+                        }}
+                        disabled={isLoading}
+                    >
+                        Save
+                    </Button>
+                    <Button
+                        onClick={async () => {
+                            const history = window.localStorage.getItem("chat_history");
+                            if (history) setChatMessages(JSON.parse(history));
+                        }}
+                        disabled={isLoading}
+                    >
+                        Load
+                    </Button>
+                    <Button
+                        onClick={async () => {
+                            window.localStorage.removeItem("chat_history");
+                            setChatMessages([]);
+                        }}
+                        disabled={isLoading}
+                    >
+                        Reset
+                    </Button>
                 </div>
             </div>
         </div>

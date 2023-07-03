@@ -4,6 +4,7 @@ import { SmsDataService } from "../data/sms-service";
 import { TwilioClient } from "../clients/twilio-client";
 import { AiReceptionistClient } from "../clients/receptionist-client";
 import { SimpleChatMessage } from "@/app/types";
+import { inngest } from "@/inngest/client";
 
 export class AiReceptionist {
     private client: AiReceptionistClient;
@@ -23,13 +24,17 @@ export class AiReceptionist {
 
         try {
             // retrieve all messages
-            const messages = await smsService.retrieveMessages(fromPhone, toPhone);
+            const messages = await smsService.retrieveMessages(fromPhone, toPhone, false);
             if (messages.length == 0) {
                 console.log("no messages to process, returning");
                 return;
             }
             if (messages[messages.length - 1].speaker == "Assistant") {
                 console.log("already responded");
+                return;
+            }
+            if (messages.find((m) => m.speaker == "Assistant" && m.message.includes("/END"))) {
+                console.log("conversation already closed, no need to respond");
                 return;
             }
 
@@ -70,8 +75,21 @@ export class AiReceptionist {
         const twilio = new TwilioClient();
 
         try {
+            let messageToSend = message;
+
+            // check if we have all the answers
+            const isDone = message.includes("/END");
+            if (isDone) {
+                messageToSend = messageToSend.replaceAll("/END", "");
+
+                await inngest.send({
+                    name: "generate/lead",
+                    data: { fromPhone, toPhone },
+                });
+            }
+
             // send the ai response to caller
-            const sent = await twilio.sendMessage(toPhone, fromPhone, message);
+            const sent = await twilio.sendMessage(toPhone, fromPhone, messageToSend);
 
             // add ai response to messages history
             smsService.insertSmsMessage({

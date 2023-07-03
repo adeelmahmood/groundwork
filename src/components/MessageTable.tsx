@@ -6,8 +6,8 @@ export default function MessageTable({ chatMessages }: { chatMessages: SimpleCha
         return (
             <div className="max-w-sm flex items-center">
                 {message.message.split("\n").map((m: string, i) => {
-                    let url = m.substring(m.indexOf(":") + 1);
-                    url = url.endsWith("]") ? url.substring(0, url.length - 1) : url;
+                    let url = m.substring(m.indexOf("(") + 1);
+                    url = url.endsWith(")") ? url.substring(0, url.length - 1) : url;
                     return (
                         <div key={i} className="mr-2">
                             <a href={url} target="_blank">
